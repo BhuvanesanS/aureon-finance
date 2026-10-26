@@ -72,6 +72,60 @@ function useRoute() {
 
   return [path, go, isNavigating]
 }
+function useAmbientMotion() {
+  useEffect(() => {
+    const root = document.documentElement
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (reduceMotion.matches) return undefined
+
+    let frame = 0
+    const updateScroll = () => {
+      root.style.setProperty('--scroll-shift', `${Math.min(window.scrollY, 900) * -0.025}px`)
+    }
+    const updatePointer = (event) => {
+      if (event.pointerType && event.pointerType !== 'mouse') return
+      window.cancelAnimationFrame(frame)
+      frame = window.requestAnimationFrame(() => {
+        const x = (event.clientX / window.innerWidth - 0.5) * 18
+        const y = (event.clientY / window.innerHeight - 0.5) * 14
+        root.style.setProperty('--pointer-x', `${x}px`)
+        root.style.setProperty('--pointer-y', `${y}px`)
+        root.style.setProperty('--cursor-left', `${event.clientX}px`)
+        root.style.setProperty('--cursor-top', `${event.clientY}px`)
+        root.style.setProperty('--pointer-grid-x', `${x * -0.28}px`)
+        root.style.setProperty('--pointer-grid-y', `${y * -0.28}px`)
+        root.style.setProperty('--pointer-aurora-x', `${x * -0.45}px`)
+        root.style.setProperty('--pointer-aurora-y', `${y * -0.45}px`)
+      })
+    }
+    const sections = [...document.querySelectorAll('main section')]
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => entry.target.classList.toggle('in-view', entry.isIntersecting))
+    }, { threshold: 0.12 })
+
+    root.classList.add('motion-ready')
+    updateScroll()
+    window.addEventListener('scroll', updateScroll, { passive: true })
+    window.addEventListener('pointermove', updatePointer, { passive: true })
+    sections.forEach((section) => observer.observe(section))
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', updateScroll)
+      window.removeEventListener('pointermove', updatePointer)
+      observer.disconnect()
+      root.classList.remove('motion-ready')
+      root.style.removeProperty('--scroll-shift')
+      root.style.removeProperty('--pointer-x')
+      root.style.removeProperty('--pointer-y')
+      root.style.removeProperty('--cursor-left')
+      root.style.removeProperty('--cursor-top')
+      root.style.removeProperty('--pointer-grid-x')
+      root.style.removeProperty('--pointer-grid-y')
+      root.style.removeProperty('--pointer-aurora-x')
+      root.style.removeProperty('--pointer-aurora-y')
+    }
+  }, [])
+}
 function Brand({ go }) { return <a className="brand" href="/" onClick={(e) => { e.preventDefault(); go('/') }} aria-label={site.name}><img className="brand-mark brand-logo" src={logoMark} alt="" /><span className="brand-copy"><b>{site.shortName}<span>°</span></b><small>{site.descriptor}</small></span></a> }
 function Header({ path, go }) {
   const [open, setOpen] = useState(false)
@@ -143,6 +197,7 @@ function Footer({ go }) { return <footer><div><Brand go={go} /><p>Market educati
 function PageLoader({ show }) { return <div className={show ? 'route-loader show' : 'route-loader'} aria-hidden="true"><span>MUBSAFIN</span><i /></div> }
 export default function MubsaApp() {
   const [path, go, isNavigating] = useRoute()
+  useAmbientMotion()
   const [guidanceOpen, setGuidanceOpen] = useState(false)
   const [guidanceSeen, setGuidanceSeen] = useState(false)
   const plain = path.split('?')[0]
@@ -154,5 +209,5 @@ export default function MubsaApp() {
   const dismissGuidance = () => { setGuidanceOpen(false); setGuidanceSeen(true) }
   const course = courses.find((c) => plain === `/courses/${c.slug}`)
   const page = course ? <Detail course={course} go={go} /> : plain === '/courses' ? <Courses go={go} /> : plain === '/about' ? <About go={go} /> : plain === '/faq' ? <FAQ go={go} /> : plain === '/booking' ? <Booking path={path} go={go} /> : plain === '/contact' ? <Contact path={path} /> : <Home go={go} />
-  return <main><PageLoader show={isNavigating} /><Header path={path} go={go} /><SocialRail go={go} /><div className="route-view" key={path}>{page}</div><Footer go={go} /><a className="whatsapp-float" href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="Chat with Mubsa Fin Institute on WhatsApp"><FaWhatsapp /><b>WhatsApp</b></a><GuidancePopup open={guidanceOpen} close={dismissGuidance} go={go} /></main>
+  return <main><div className="cursor-glow" aria-hidden="true"><i /><b /></div><PageLoader show={isNavigating} /><Header path={path} go={go} /><SocialRail go={go} /><div className="route-view" key={path}>{page}</div><Footer go={go} /><a className="whatsapp-float" href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="Chat with Mubsafin on WhatsApp"><FaWhatsapp /><b>WhatsApp</b></a><GuidancePopup open={guidanceOpen} close={dismissGuidance} go={go} /></main>
 }

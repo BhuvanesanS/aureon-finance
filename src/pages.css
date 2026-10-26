@@ -206,6 +206,27 @@ footer .footer-nav button { border: 0; padding: 0; background: none; color: #d9e
 @media (max-width: 760px) { .site-header { height: 72px; padding-inline: 20px; }.site-header::after { right: 20px; left: 20px; }.menu-toggle { position: relative; z-index: 102; display: flex; margin-left: auto; margin-right: 14px; width: 30px; height: 28px; flex-direction: column; justify-content: center; gap: 6px; border: 0; background: none; }.menu-toggle span { width: 25px; height: 1px; background: white; }.nav { display: none; position: absolute; z-index: 101; top: 71px; right: 0; left: 0; flex-direction: column; }.nav.open { display: flex; }.header-cta { padding: 9px 12px; gap: 5px; font-size: 11px; white-space: nowrap; }.header-cta .arrow { font-size: 16px; }.mobile-only { display: block; }.mobile-enquire { display: inline-flex; }.nav-scrim { inset: 72px 0 0; }.mubsa-hero { padding-top: 140px; }.learning-stats { grid-template-columns: 1fr; }.learning-stats div { grid-template-columns: minmax(132px, auto) 1fr; align-items: center; padding: 20px 24px; border-right: 0; border-bottom: 1px solid rgba(148, 202, 255, .14); }.learning-stats div:last-child { border-bottom: 0; }.social-rail { left: 12px; }.social-rail a, .social-rail button { width: 34px; height: 34px; }.whatsapp-float { right: 13px; } }
 @media (max-width: 620px) { .brand-copy small { font-size: 7px; }.brand-copy b { font-size: 13px; }.course-card { animation-duration: .45s; }.learning-stats strong { font-size: 18px; }.social-rail { display: none; } }
 
+/* Movement is intentionally subtle: pointer depth on larger screens and reveal/parallax while mobile users scroll. */
+@media (hover: hover) and (pointer: fine) {
+  .cursor-glow { position: fixed; z-index: 300; left: var(--cursor-left, -100px); top: var(--cursor-top, -100px); width: 54px; height: 54px; pointer-events: none; translate: -50% -50%; opacity: 0; transition: left .11s ease-out, top .11s ease-out, opacity .25s ease; mix-blend-mode: screen; }
+  .motion-ready .cursor-glow { opacity: 1; }
+  .cursor-glow::before { content: ''; position: absolute; inset: -32px; border-radius: 50%; background: radial-gradient(circle, rgba(209, 245, 112, .24) 0%, rgba(102, 207, 82, .1) 28%, transparent 68%); filter: blur(4px); animation: cursorBreathe 1.8s ease-in-out infinite; }
+  .cursor-glow i, .cursor-glow b { position: absolute; display: block; border-radius: 50%; }
+  .cursor-glow i { inset: 19px; border: 1px solid rgba(230, 255, 187, .88); box-shadow: 0 0 15px rgba(185, 241, 105, .8); }
+  .cursor-glow b { width: 5px; height: 5px; top: 24px; left: 24px; background: #edffc1; box-shadow: 0 0 14px 3px rgba(204, 244, 111, .92); }
+  .motion-ready .mubsa-hero .hero-photo { transform: translate3d(var(--pointer-x, 0px), var(--pointer-y, 0px), 0); transition: transform .65s cubic-bezier(.22, 1, .36, 1); }
+  .motion-ready .mubsa-hero .hero-grid, .motion-ready .page-hero-grid { transform: translate3d(var(--pointer-grid-x, 0px), var(--pointer-grid-y, 0px), 0); transition: transform .8s cubic-bezier(.22, 1, .36, 1); }
+  .motion-ready .mubsa-hero .aurora-one, .motion-ready .page-hero-orb { translate: var(--pointer-aurora-x, 0px) var(--pointer-aurora-y, 0px); transition: translate .9s ease-out; }
+}
+@keyframes cursorBreathe { 50% { transform: scale(1.13); opacity: .72; } }
+.motion-ready .hero-grid, .motion-ready .page-hero-grid { translate: 0 var(--scroll-shift, 0px); }
+@media (max-width: 760px) and (prefers-reduced-motion: no-preference) {
+  .motion-ready .route-view > section { opacity: .01; transform: translateY(20px); transition: opacity .6s ease, transform .6s cubic-bezier(.22, 1, .36, 1); }
+  .motion-ready .route-view > section.in-view { opacity: 1; transform: none; }
+  .motion-ready .route-view > .hero, .motion-ready .route-view > .page-hero { opacity: 1; transform: none; }
+  .motion-ready .course-card { transition: transform .45s cubic-bezier(.22, 1, .36, 1), box-shadow .35s ease; }
+}
+
 /* Mubsa growth palette: light green energy grounded by forest-green surfaces. */
 main, .mubsa-hero, .page-hero, .contact-band, footer, .course-principles, .method-card, .value-card { background-color: #061b12; }
 .mubsa-hero { background: #061b12; }.hero-photo::before { background: linear-gradient(90deg, #061b12 0%, rgba(6, 27, 18, .94) 12%, rgba(6, 27, 18, .36) 55%, rgba(6, 27, 18, .08) 100%), linear-gradient(0deg, rgba(4, 20, 13, .78), transparent 43%); }.hero-photo i { background: radial-gradient(circle, rgba(191, 236, 118, .2), transparent 68%); }.aurora-one { background: rgba(102, 207, 82, .2); }.aurora-two { background: rgba(212, 242, 101, .13); }
