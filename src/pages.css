@@ -224,11 +224,13 @@ footer .footer-nav button { border: 0; padding: 0; background: none; color: #d9e
 @keyframes cursorBreathe { 50% { transform: scale(1.13); opacity: .72; } }
 .motion-ready .hero-grid, .motion-ready .page-hero-grid { translate: 0 var(--scroll-shift, 0px); }
 @media (max-width: 760px) and (prefers-reduced-motion: no-preference) {
-  .motion-ready .route-view > section { opacity: .01; transform: translateY(20px); transition: opacity .6s ease, transform .6s cubic-bezier(.22, 1, .36, 1); }
-  .motion-ready .route-view > section.in-view { opacity: 1; transform: none; }
-  .motion-ready .route-view > .hero, .motion-ready .route-view > .page-hero { opacity: 1; transform: none; }
+  /* Content must never be hidden while waiting for IntersectionObserver.
+     Some Android WebViews delay that callback during restored scrolling. */
+  .motion-ready .route-view > section { opacity: 1; transform: none; }
+  .motion-ready .route-view > section.in-view:not(.hero):not(.page-hero) { animation: mobileSectionEnter .52s cubic-bezier(.22, 1, .36, 1) both; }
   .motion-ready .course-card { transition: transform .45s cubic-bezier(.22, 1, .36, 1), box-shadow .35s ease; }
 }
+@keyframes mobileSectionEnter { from { opacity: .72; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 /* Mubsa growth palette: light green energy grounded by forest-green surfaces. */
 main, .mubsa-hero, .page-hero, .contact-band, footer, .course-principles, .method-card, .value-card { background-color: #061b12; }
