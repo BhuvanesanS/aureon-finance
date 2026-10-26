@@ -63,9 +63,10 @@ footer .footer-nav button { border: 0; padding: 0; background: none; color: #d9e
 .nav .current::after { bottom: 1px; width: 4px; height: 4px; box-shadow: 0 0 12px var(--cyan); }
 .header-cta { border: 1px solid rgba(140, 193, 255, .28); border-radius: 999px; padding: 10px 14px; }
 .header-cta:hover { background: rgba(104, 169, 255, .12); border-color: rgba(125, 225, 255, .72); transform: translateY(-2px); }
-.route-loader { position: fixed; z-index: 100; inset: 0; display: grid; place-content: center; gap: 14px; background: rgba(7, 13, 28, .96); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .16s ease, visibility 0s linear .16s; }
+.route-loader { position: fixed; z-index: 100; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; background: radial-gradient(circle at 50% 42%, rgba(123, 213, 83, .18), transparent 26%), rgba(6, 27, 18, .98); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .16s ease, visibility 0s linear .16s; }
 .route-loader.show { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .16s ease; }
-.route-loader span { color: #e8f4ff; font: 11px var(--mono); letter-spacing: .28em; }
+.route-loader strong { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 14px; background: linear-gradient(135deg, #ddf67b, #58bf53); color: #0a321c; box-shadow: 0 0 0 9px rgba(199, 238, 118, .08), 0 0 45px rgba(149, 223, 89, .32); font: 800 23px/1 Manrope, sans-serif; animation: loaderMarkIn .5s cubic-bezier(.22, 1, .36, 1) both; }
+.route-loader span { color: #f1ffe6; font: 11px var(--mono); letter-spacing: .28em; animation: loaderWordIn .45s .12s ease both; }
 .route-loader i { width: 106px; height: 1px; background: linear-gradient(90deg, transparent, var(--cyan), transparent); animation: routePulse .52s ease-in-out infinite alternate; }
 .route-view { animation-duration: .48s; }
 
@@ -93,6 +94,8 @@ footer .footer-nav button { border: 0; padding: 0; background: none; color: #d9e
 .button:focus-visible, .link-button:focus-visible, .nav a:focus-visible, .menu-toggle:focus-visible, .header-cta:focus-visible, .module-item button:focus-visible, .faq-item button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
 
 @keyframes routePulse { from { transform: scaleX(.55); opacity: .4; } to { transform: scaleX(1); opacity: 1; } }
+@keyframes loaderMarkIn { from { opacity: 0; transform: scale(.66) rotate(-9deg); } to { opacity: 1; transform: none; } }
+@keyframes loaderWordIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
 @keyframes mubsaChartFloat { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
 @keyframes disclosureIn { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: translateY(0); } }
 

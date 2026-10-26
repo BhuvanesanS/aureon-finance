@@ -126,6 +126,15 @@ function useAmbientMotion() {
     }
   }, [])
 }
+function useInitialLoader() {
+  const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const timer = window.setTimeout(() => setLoading(false), reducedMotion ? 0 : 950)
+    return () => window.clearTimeout(timer)
+  }, [])
+  return loading
+}
 function Brand({ go }) { return <a className="brand" href="/" onClick={(e) => { e.preventDefault(); go('/') }} aria-label={site.name}><img className="brand-mark brand-logo" src={logoMark} alt="" /><span className="brand-copy"><b>{site.shortName}<span>°</span></b><small>{site.descriptor}</small></span></a> }
 function Header({ path, go }) {
   const [open, setOpen] = useState(false)
@@ -194,10 +203,11 @@ function ContactBand({ go, title, text, primary, secondary, course, primaryPath 
 function GuidancePopup({ open, close, go }) { if (!open) return null; return <div className="guidance-backdrop" role="presentation"><section className="guidance-popup" role="dialog" aria-modal="true" aria-labelledby="guidance-title"><button className="popup-close" onClick={close} aria-label="Close guidance popup">×</button><p className="eyebrow">COURSE GUIDANCE</p><h2 id="guidance-title">Not sure where to <em>begin?</em></h2><p>Choose a course level and request a guidance session. Mubsa Fin Institute will confirm availability with you directly.</p><div className="popup-course-options">{courses.map((course) => <button key={course.slug} onClick={() => { close(); go(`/booking?course=${encodeURIComponent(course.name)}`) }}><span>{course.number}</span><strong>{course.name}</strong><Arrow /></button>)}</div><a className="popup-whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer">WhatsApp us <Arrow /></a></section></div> }
 function SocialRail({ go, compact = false }) { return <div className={compact ? 'footer-social' : 'social-rail'}>{compact && <a href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="Chat with Mubsa Fin Institute on WhatsApp" title="WhatsApp"><FaWhatsapp /></a>}{socialItems.map(({ label, icon: Icon }) => <button key={label} onClick={() => go('/contact')} aria-label={`Ask for ${label} details`} title={`${label} details coming soon`}><Icon /></button>)}</div> }
 function Footer({ go }) { return <footer><div><Brand go={go} /><p>Market education from foundations to advanced analysis.</p></div><div className="footer-nav"><button onClick={() => go('/')}>Home</button><button onClick={() => go('/courses')}>Courses</button><button onClick={() => go('/about')}>About</button><button onClick={() => go('/booking')}>Booking</button><button onClick={() => go('/contact')}>Contact</button><button onClick={() => go('/faq')}>FAQ</button></div><div className="footer-contact"><a href="https://MubsaCapital.com">MubsaCapital.com</a><a href={`mailto:${site.email}`}>{site.email}</a><a href={`tel:${site.phone.replace(/\s/g, '')}`}>{site.phone}</a><span>{site.locations}</span><SocialRail go={go} compact /></div><small>© {copyrightYear} {site.name}. Trading and investing involve risk, including possible loss of capital. Course content is educational and does not guarantee profits or replace financial advice based on individual circumstances.</small></footer> }
-function PageLoader({ show }) { return <div className={show ? 'route-loader show' : 'route-loader'} aria-hidden="true"><span>MUBSAFIN</span><i /></div> }
+function PageLoader({ show }) { return <div className={show ? 'route-loader show' : 'route-loader'} aria-hidden="true"><strong>M</strong><span>MUBSAFIN</span><i /></div> }
 export default function MubsaApp() {
   const [path, go, isNavigating] = useRoute()
   useAmbientMotion()
+  const isInitialLoading = useInitialLoader()
   const [guidanceOpen, setGuidanceOpen] = useState(false)
   const [guidanceSeen, setGuidanceSeen] = useState(false)
   const plain = path.split('?')[0]
@@ -209,5 +219,5 @@ export default function MubsaApp() {
   const dismissGuidance = () => { setGuidanceOpen(false); setGuidanceSeen(true) }
   const course = courses.find((c) => plain === `/courses/${c.slug}`)
   const page = course ? <Detail course={course} go={go} /> : plain === '/courses' ? <Courses go={go} /> : plain === '/about' ? <About go={go} /> : plain === '/faq' ? <FAQ go={go} /> : plain === '/booking' ? <Booking path={path} go={go} /> : plain === '/contact' ? <Contact path={path} /> : <Home go={go} />
-  return <main><div className="cursor-glow" aria-hidden="true"><i /><b /></div><PageLoader show={isNavigating} /><Header path={path} go={go} /><SocialRail go={go} /><div className="route-view" key={path}>{page}</div><Footer go={go} /><a className="whatsapp-float" href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="Chat with Mubsafin on WhatsApp"><FaWhatsapp /><b>WhatsApp</b></a><GuidancePopup open={guidanceOpen} close={dismissGuidance} go={go} /></main>
+  return <main><div className="cursor-glow" aria-hidden="true"><i /><b /></div><PageLoader show={isNavigating || isInitialLoading} /><Header path={path} go={go} /><SocialRail go={go} /><div className="route-view" key={path}>{page}</div><Footer go={go} /><a className="whatsapp-float" href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="Chat with Mubsafin on WhatsApp"><FaWhatsapp /><b>WhatsApp</b></a><GuidancePopup open={guidanceOpen} close={dismissGuidance} go={go} /></main>
 }
