@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" role="img" aria-labelledby="title">
+  <title>Mubsafin temporary mark</title>
+  <defs>
+    <linearGradient id="g" x1="8" y1="8" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d5f472"/>
+      <stop offset="1" stop-color="#5dc94c"/>
+    </linearGradient>
+  </defs>
+  <rect width="88" height="88" rx="23" fill="#0b321f"/>
+  <path d="M20 60V27h11.5l12.5 18L56.5 27H68v33H56V45l-10.7 15h-2.6L32 45v15H20Z" fill="url(#g)"/>
+  <circle cx="67" cy="19" r="5" fill="#f6c95d"/>
+</svg>
