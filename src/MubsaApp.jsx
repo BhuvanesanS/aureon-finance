@@ -42,6 +42,7 @@ const courseFeedback = [
   { rating: '4.7', quote: 'The class was very useful; I never felt bored. I look forward to continuing the learning journey.' },
   { rating: '5.0', quote: 'When I joined, I had doubts about whether I could learn trading. The teaching, examples, and experience shared were motivating, and doubts were always cleared.' },
   { rating: '5.0', quote: 'Before attending, I had zero knowledge of trading and no confidence in understanding the market. The clear, beginner-friendly teaching and continuous support helped me learn with confidence.' },
+  { rating: '5.0', quote: 'Before the course, intraday trading felt out of reach. I can now understand charts, structure, patterns, and strategies. I still need practice, but the course gave me confidence and hope.' },
 ]
 const Arrow = () => <span className="arrow" aria-hidden="true">↗</span>
 const copyrightYear = new Date().getFullYear()
