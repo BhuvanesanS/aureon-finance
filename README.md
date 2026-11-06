@@ -37,11 +37,13 @@ For local development, the API stores webinars, registrations, and bookings in `
 
 The Vite build contains the public frontend only: `npm run build`. Hosting the frontend and API on different origins requires configuring CORS and using a secure cross-site session cookie strategy; same-origin hosting is recommended for this cookie-authenticated admin.
 
-## Deploy frontend and API together
+## Free deployment on Cloudflare
 
-The root `render.yaml` configures one Render Node web service that builds the Vite frontend and serves it together with the API. The public site, `/admin`, and `/api/*` share one origin. It attaches a 1 GB persistent disk at `/var/data`; the API stores records there when `DATA_DIR=/var/data`. This requires a paid Render web-service plan because Render persistent disks are not available on free web services. The disk is single-instance storage, so keep the service at one instance.
+The project is configured for Cloudflare Workers Static Assets plus a D1 database. Static React pages and the API share the same `workers.dev` origin, and webinar, registration, and booking records live in D1 rather than the worker's ephemeral filesystem. `wrangler.jsonc` defines the Worker, SPA routes, and database binding; `migrations/0001_init.sql` creates the data tables.
 
-To deploy, connect this GitHub repository in Render and create a Blueprint from `render.yaml`. Set `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `ADMIN_SESSION_SECRET` in the service's environment before sharing the admin URL. Provider credentials for Zoom, Resend, and WhatsApp are optional; set them in Render if those integrations should send live links and confirmations. Do not commit secrets to this repository. The health-check endpoint is `/api/health`.
+Cloudflare's Workers Free plan currently includes up to 100,000 requests per day and D1 includes 5 GB storage, 5 million rows read per day, and 100,000 rows written per day. Requests stop succeeding when a free quota is exhausted until it resets. See Cloudflare's [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/) and [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/).
+
+To publish, sign into Cloudflare, create the D1 database with `npm run db:create`, copy its returned ID into `wrangler.jsonc`, set `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` as Worker secrets, apply `npm run db:migrate:remote`, then run `npm run deploy`. The admin email supplied for this setup is `bhuvanesan.s10@gmail.com` and is set as a Worker variable. Set the password and secret with `npx wrangler secret put ADMIN_PASSWORD` and `npx wrangler secret put ADMIN_SESSION_SECRET`. Zoom, Resend, and WhatsApp credentials are optional Worker secrets; webinar links can be entered manually until Zoom is configured. Never commit secrets to Git.
 
 ## Content notes
 

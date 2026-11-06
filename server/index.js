@@ -2,12 +2,10 @@ import { createServer } from 'node:http'
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, extname, join, resolve, sep } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const port = Number(process.env.PORT || 8787)
-const directory = dirname(fileURLToPath(import.meta.url))
-const storePath = join(process.env.DATA_DIR || join(directory, 'data'), 'records.json')
-const staticDirectory = resolve(directory, '..', 'dist')
+const storePath = join(process.env.DATA_DIR || join(resolve('.'), 'server', 'data'), 'records.json')
+const staticDirectory = resolve('dist')
+let runtimeEnv = process.env
 const cookieName = 'mfi_admin_session'
 const sessionTtlSeconds = 8 * 60 * 60
 const registrationCities = new Set(['Chennai', 'Coimbatore', 'Madurai', 'Bengaluru', 'Hyderabad', 'Mumbai', 'Delhi', 'Dubai', 'Other'])
@@ -64,6 +62,17 @@ async function serveFrontend(request, response, pathname) {
 }
 
 async function readStore() {
+  if (runtimeEnv.DB) {
+    const [settings, ...collections] = await Promise.all([
+      runtimeEnv.DB.prepare('SELECT data FROM app_settings WHERE id = 1').first(),
+      ...['webinars', 'spotlights', 'registrations', 'bookings'].map((table) => runtimeEnv.DB.prepare(`SELECT data FROM ${table}`).all()),
+    ])
+    return {
+      ...emptyStore(),
+      settings: settings ? JSON.parse(settings.data) : emptyStore().settings,
+      ...Object.fromEntries(['webinars', 'spotlights', 'registrations', 'bookings'].map((key, index) => [key, (collections[index].results || []).map((row) => JSON.parse(row.data))])),
+    }
+  }
   try {
     return { ...emptyStore(), ...JSON.parse(await readFile(storePath, 'utf8')) }
   } catch (error) {
@@ -73,7 +82,30 @@ async function readStore() {
 }
 
 async function updateStore(update) {
-  writeQueue = writeQueue.then(async () => {
+  writeQueue = writeQueue.catch(() => {}).then(async () => {
+    if (runtimeEnv.DB) {
+      const before = await readStore()
+      const store = structuredClone(before)
+      const result = await update(store)
+      const statements = []
+      if (JSON.stringify(before.settings) !== JSON.stringify(store.settings)) {
+        statements.push(runtimeEnv.DB.prepare('INSERT INTO app_settings (id, data) VALUES (1, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data').bind(JSON.stringify(store.settings)))
+      }
+      for (const table of ['webinars', 'spotlights', 'registrations', 'bookings']) {
+        const previous = new Map((before[table] || []).map((item) => [item.id, item]))
+        const current = new Map((store[table] || []).map((item) => [item.id, item]))
+        for (const [id, item] of current) {
+          if (JSON.stringify(previous.get(id)) !== JSON.stringify(item)) {
+            statements.push(runtimeEnv.DB.prepare(`INSERT INTO ${table} (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data`).bind(id, JSON.stringify(item)))
+          }
+        }
+        for (const id of previous.keys()) {
+          if (!current.has(id)) statements.push(runtimeEnv.DB.prepare(`DELETE FROM ${table} WHERE id = ?`).bind(id))
+        }
+      }
+      if (statements.length) await runtimeEnv.DB.batch(statements)
+      return result
+    }
     const store = await readStore()
     const result = await update(store)
     await mkdir(dirname(storePath), { recursive: true })
@@ -131,7 +163,7 @@ function rateLimited(request, limit, keySuffix = '') {
 }
 
 function sign(value) {
-  return createHmac('sha256', process.env.ADMIN_SESSION_SECRET || '').update(value).digest('base64url')
+  return createHmac('sha256', runtimeEnv.ADMIN_SESSION_SECRET || '').update(value).digest('base64url')
 }
 
 function makeSession() {
@@ -142,7 +174,7 @@ function makeSession() {
 
 function hasAdminSession(request) {
   const token = (request.headers.cookie || '').split(';').map((part) => part.trim()).find((part) => part.startsWith(`${cookieName}=`))?.slice(cookieName.length + 1)
-  if (!token || !process.env.ADMIN_SESSION_SECRET) return false
+  if (!token || !runtimeEnv.ADMIN_SESSION_SECRET) return false
   const [payload, signature] = token.split('.')
   if (!payload || !signature) return false
   const expected = Buffer.from(sign(payload))
@@ -156,7 +188,7 @@ function hasAdminSession(request) {
 }
 
 function adminCookie(value, maxAge = sessionTtlSeconds) {
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : ''
+  const secure = runtimeEnv.NODE_ENV === 'production' ? '; Secure' : ''
   return `${cookieName}=${value}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${secure}`
 }
 
@@ -167,7 +199,7 @@ function requireAdmin(request, response) {
 }
 
 async function zoomRequest(path, options = {}) {
-  const { ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET } = process.env
+  const { ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET } = runtimeEnv
   if (!ZOOM_ACCOUNT_ID || !ZOOM_CLIENT_ID || !ZOOM_CLIENT_SECRET) {
     const error = new Error('Zoom is not configured. Add the Zoom Server-to-Server OAuth credentials to the backend environment.')
     error.status = 503
@@ -193,7 +225,7 @@ function escapeHtml(value) {
 }
 
 async function sendEmail(registration, webinar) {
-  const { RESEND_API_KEY, MAIL_FROM } = process.env
+  const { RESEND_API_KEY, MAIL_FROM } = runtimeEnv
   if (!RESEND_API_KEY || !MAIL_FROM) return 'not_configured'
   const title = escapeHtml(webinar.title)
   const date = escapeHtml(new Date(webinar.startsAt).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short', timeZone: webinar.timeZone || 'Asia/Kolkata' }))
@@ -215,7 +247,7 @@ async function sendEmail(registration, webinar) {
 }
 
 async function sendWhatsApp(registration, webinar) {
-  const { WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_TEMPLATE_NAME, WHATSAPP_TEMPLATE_LANGUAGE_CODE, WHATSAPP_GRAPH_API_VERSION } = process.env
+  const { WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_TEMPLATE_NAME, WHATSAPP_TEMPLATE_LANGUAGE_CODE, WHATSAPP_GRAPH_API_VERSION } = runtimeEnv
   if (!WHATSAPP_ACCESS_TOKEN || !WHATSAPP_PHONE_NUMBER_ID || !WHATSAPP_TEMPLATE_NAME || !WHATSAPP_GRAPH_API_VERSION) return 'not_configured'
   const to = registration.phone.replace(/\D/g, '')
   const date = new Date(webinar.startsAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: webinar.timeZone || 'Asia/Kolkata' })
@@ -252,10 +284,11 @@ function publicWebinar(webinar) {
   return { id, title, description, startsAt, durationMinutes, timeZone, speaker, joinUrl }
 }
 
-const server = createServer(async (request, response) => {
+export function createApiServer() {
+  return createServer(async (request, response) => {
   if (request.method === 'OPTIONS') {
     const origin = request.headers.origin || ''
-    const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173'
+    const allowedOrigin = runtimeEnv.CORS_ORIGIN || 'http://localhost:5173'
     response.writeHead(origin === allowedOrigin ? 204 : 403, {
       ...(origin === allowedOrigin ? { 'Access-Control-Allow-Origin': origin, 'Access-Control-Allow-Methods': 'GET,POST,PATCH,PUT,DELETE,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Credentials': 'true', 'Vary': 'Origin' } : {}),
     })
@@ -383,12 +416,12 @@ const server = createServer(async (request, response) => {
         send(response, 429, { message: 'Too many sign-in attempts. Please wait and try again.' })
         return
       }
-      if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD || !process.env.ADMIN_SESSION_SECRET) {
+      if (!runtimeEnv.ADMIN_EMAIL || !runtimeEnv.ADMIN_PASSWORD || !runtimeEnv.ADMIN_SESSION_SECRET) {
         send(response, 503, { message: 'Admin sign-in is not configured. Set ADMIN_EMAIL, ADMIN_PASSWORD, and ADMIN_SESSION_SECRET on the API server.' })
         return
       }
       const { email, password } = await readJson(request)
-      if (normalise(email, 254).toLowerCase() !== process.env.ADMIN_EMAIL.toLowerCase() || password !== process.env.ADMIN_PASSWORD) {
+      if (normalise(email, 254).toLowerCase() !== runtimeEnv.ADMIN_EMAIL.toLowerCase() || password !== runtimeEnv.ADMIN_PASSWORD) {
         send(response, 401, { message: 'Email or password is incorrect.' })
         return
       }
@@ -599,8 +632,9 @@ const server = createServer(async (request, response) => {
     console.error('API request failed:', error.message)
     send(response, 500, { message: error.message === 'Request body is too large.' || error.message === 'Request body must be valid JSON.' ? error.message : 'Unable to process this request. Please try again.' })
   }
-})
+  })
+}
 
-server.listen(port, () => {
-  console.log(`Mubsa Fin Institute API listening on http://localhost:${port}`)
-})
+export function setRuntimeEnv(env) {
+  runtimeEnv = env
+}

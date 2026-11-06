@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mubsa-fin-institute",
+  "main": "server/worker.js",
+  "compatibility_date": "2026-11-06",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    "NODE_ENV": "production",
+    "ADMIN_EMAIL": "bhuvanesan.s10@gmail.com"
+  },
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mubsa-fin-institute",
+      "database_id": "69b28b0d-14e8-463e-9234-3c3a8e92a0e7",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
