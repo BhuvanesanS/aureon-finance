@@ -199,6 +199,53 @@ footer .footer-nav button { border: 0; padding: 0; background: none; color: #d9e
 @media (max-width: 620px) { .mubsa-hero { min-height: 760px; padding-bottom: 78px; }.hero-photo { opacity: .47; }.hero-photo img { object-position: 68% center; }.hero-actions { gap: 13px; }.hero-actions .button { width: 100%; justify-content: space-between; }.hero-trust { margin-top: 27px; font-size: 9px; gap: 7px; }.learning-showcase > img { min-height: 280px; }.learning-showcase > div { padding: 61px 24px; }.whatsapp-float { right: 15px; bottom: 15px; padding: 10px; }.whatsapp-float b { display: none; }.guidance-backdrop { padding: 15px; align-items: end; }.guidance-popup { padding: 34px 24px 27px; border-radius: 15px; }.guidance-popup h2 { font-size: 42px; }.popup-course-options button { padding: 13px; } }
 @media (prefers-reduced-motion: reduce) { .hero-photo img, .guidance-backdrop, .guidance-popup { animation: none !important; } }
 
+/* Client change pass: consistent institute typography, clear public webinar strip, and usable registration form. */
+h1, h2, h3, h4, .course-feedback-card blockquote { font-family: Manrope, Arial, sans-serif !important; }
+h1 em, h2 em, h3 em, .course-feedback-card blockquote em { font-family: Manrope, Arial, sans-serif !important; font-style: italic; }
+.page-hero-copy > .eyebrow { color: #d4f477; }
+.page-hero-copy > p:not(.eyebrow) { color: #b7d1b3; max-width: 560px; font-size: 17px; line-height: 1.75; }
+.announcement-strip { position: relative; z-index: 30; display: flex; min-height: 46px; align-items: center; justify-content: center; flex-wrap: wrap; gap: 9px 20px; padding: 8px 24px; background: #d4f477; color: #15351f; font-size: 11px; line-height: 1.45; }
+.announcement-strip > span { font: 9px var(--mono); font-weight: 700; letter-spacing: .12em; }
+.announcement-strip > b { font-size: 12px; }
+.announcement-strip small { color: #405a36; }
+.announcement-strip a, .announcement-strip button { display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px; border: 1px solid rgba(19, 53, 31, .22); border-radius: 30px; background: transparent; color: #15351f; font-size: 10px; font-weight: 800; cursor: pointer; }
+.announcement-strip a:hover, .announcement-strip button:hover { background: rgba(255, 255, 255, .5); }
+.course-card { color: #133821; text-decoration: none; }
+.course-card .link-button { border: 0; background: transparent; font-family: inherit; }
+.testimonial-author { display: flex; align-items: center; gap: 11px; margin-top: 24px; padding-top: 17px; border-top: 1px solid rgba(201, 239, 117, .2); }
+.testimonial-author > span { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid rgba(201, 239, 117, .45); border-radius: 50%; color: #d4f477; font: 10px var(--mono); }
+.testimonial-author div { display: grid; gap: 3px; }
+.testimonial-author strong { color: #f3ffeb; font-size: 12px; }
+.testimonial-author small { color: #b4cfae; font: 9px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.course-feedback-card.quote-pending blockquote { color: #c2d7ba; font-size: 17px; }
+.instructor-feature { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); align-items: center; gap: clamp(32px, 7vw, 95px); padding: clamp(75px, 9vw, 130px) clamp(24px, 10vw, 160px); background: #eff8e9; color: #163725; }
+.instructor-feature > img { width: 100%; max-height: 530px; aspect-ratio: 1.12; object-fit: cover; border-radius: 12px; }
+.instructor-feature > div { max-width: 600px; }
+.instructor-feature h2 { margin: 0 0 12px; font-size: clamp(40px, 5vw, 66px); letter-spacing: -.06em; }
+.instructor-feature p:not(.eyebrow) { max-width: 520px; color: #52745a; line-height: 1.8; }
+.instructor-feature .instructor-role { color: #347a3b !important; font-weight: 800; }
+.instructor-feature .text-link { color: #347a3b; }
+.webinar-popup { max-height: min(90vh, 900px); overflow-y: auto; }
+.webinar-popup h2 { max-width: 500px; font-family: Manrope, Arial, sans-serif; font-size: clamp(32px, 4vw, 48px); line-height: 1.08; letter-spacing: -.055em; }
+.webinar-popup .webinar-popup-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 24px; }
+.webinar-popup-meta span { padding: 7px 10px; border: 1px solid rgba(190, 238, 148, .23); border-radius: 30px; color: #d7ebc9; font-size: 10px; }
+.webinar-registration-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; margin-top: 22px; }
+.webinar-registration-form label { display: grid; gap: 6px; color: #eaf6e5; font-size: 11px; font-weight: 700; }
+.webinar-registration-form input:not([type=checkbox]), .webinar-registration-form select { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid rgba(190, 238, 148, .3); border-radius: 7px; background: rgba(255, 255, 255, .08); color: #f8fff4; font: 12px Manrope, Arial, sans-serif; }
+.webinar-registration-form select option { color: #163725; }
+.webinar-registration-form input::placeholder { color: #aabda5; }
+.webinar-registration-form input:focus, .webinar-registration-form select:focus { outline: 2px solid #d4f477; outline-offset: 1px; }
+.webinar-registration-form .webinar-consent { grid-column: 1 / -1; display: flex; align-items: flex-start; gap: 9px; color: #bed4b7; font-size: 10px; font-weight: 500; line-height: 1.55; }
+.webinar-consent input { margin-top: 2px; accent-color: #d4f477; }
+.webinar-registration-form .button, .webinar-registration-form > .form-note, .webinar-registration-form > .form-error { grid-column: 1 / -1; }
+.webinar-registration-form .button { justify-content: center; }
+.webinar-registration-form .form-note, .webinar-registration-form .form-error { margin: 0; font-size: 11px; line-height: 1.6; }
+.popup-whatsapp { display: inline-flex; gap: 8px; margin-top: 18px; }
+footer .footer-nav { display: flex; flex-direction: row; flex-wrap: wrap; gap: 12px 22px; align-content: start; }
+footer > div:first-child > p { max-width: 380px; color: #9daeaa; font-size: 12px; line-height: 1.8; }
+@media (max-width: 760px) { .instructor-feature { grid-template-columns: 1fr; }.instructor-feature > img { max-height: 360px; }.announcement-strip { gap: 7px 10px; padding-inline: 12px; text-align: center; }.announcement-strip > span { width: 100%; }.webinar-registration-form { grid-template-columns: 1fr; }.webinar-registration-form .webinar-consent, .webinar-registration-form .button, .webinar-registration-form > .form-note, .webinar-registration-form > .form-error { grid-column: 1; } }
+@media (max-width: 620px) { .instructor-feature { padding: 70px 24px; }.webinar-popup { max-height: 88vh; padding: 34px 20px 26px; }.webinar-popup .webinar-popup-meta { margin-block: 15px 18px; }.announcement-strip > small { width: 100%; } }
+
 /* Refined responsive navigation and course visual hierarchy. */
 .brand-copy { display: grid; gap: 1px; line-height: 1; }.brand-copy b { font-size: 14px; letter-spacing: .12em; }.brand-copy small { color: #a4b6d7; font: 8px var(--mono); letter-spacing: .14em; }
 .course-visual { isolation: isolate; background: #0a1530 !important; }.course-visual img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; filter: saturate(.8) contrast(1.03); transition: transform .7s cubic-bezier(.22, 1, .36, 1), filter .4s ease; }.course-visual::after { content: ''; position: absolute; z-index: -1; inset: 0; background: linear-gradient(135deg, rgba(6, 17, 35, .1), rgba(5, 16, 34, .8)); }.course-card:hover .course-visual img { transform: scale(1.08); filter: saturate(1) contrast(1.08); }.course-card:nth-child(2) .course-visual img { object-position: 76% center; }.course-card:nth-child(3) .course-visual img { object-position: 35% center; }
@@ -251,3 +298,59 @@ main, .mubsa-hero, .page-hero, .contact-band, footer, .course-principles, .metho
 .whatsapp-float { background: #36aa59; border-color: rgba(220, 255, 207, .65); }.whatsapp-float:hover { background: #238b47; }.whatsapp-float svg { color: #26944a; }.social-rail a, .social-rail button { border-color: rgba(179, 235, 135, .48); background: rgba(7, 42, 23, .87); color: #ecffe3; }.social-rail a:hover, .social-rail button:hover { color: #d6f984; border-color: #d6f984; background: #15522d; }.footer-social a:hover, .footer-social button:hover { border-color: #c9ef75; background: rgba(161, 226, 104, .16); }.guidance-popup { border-color: rgba(207, 244, 130, .34); background: radial-gradient(circle at 94% 0%, rgba(127, 206, 78, .3), transparent 36%), #0a331e; }.guidance-popup::after { background: rgba(192, 238, 109, .14); }.guidance-popup h2 em, .popup-course-options span, .popup-course-options .arrow { color: #d4f477; }.guidance-popup > p:not(.eyebrow) { color: #bfd9b9; }.popup-course-options button { border-color: rgba(190, 238, 148, .23); background: rgba(255, 255, 255, .045); }.popup-course-options button:hover { border-color: rgba(212, 244, 119, .72); background: rgba(173, 231, 105, .12); }.popup-whatsapp { color: #a7ef91; }
 @media (max-width: 900px) { .course-feedback-heading, .learner-testimonials-heading { grid-template-columns: 1fr; gap: 20px; }.course-feedback-grid, .learner-testimonial-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .course-feedback, .learner-testimonials { padding: 72px 24px; }.course-feedback-grid, .learner-testimonial-grid { grid-template-columns: 1fr; gap: 13px; }.course-feedback-card, .learner-testimonial-card { min-height: 194px; padding: 24px; }.course-feedback-card blockquote { font-size: 23px; }.learner-testimonial-card small { margin-top: 28px; } }
+
+/* Keep the pale homepage showcase readable after the green theme override. */
+.learning-showcase > div { color: #163725; }
+.learning-showcase .eyebrow { color: #4b744c; }
+.learning-showcase h2 { color: #163725; }
+.learning-showcase h2 em { color: #347a3b; }
+.learning-showcase p:not(.eyebrow) { color: #456b4d; }
+.learning-showcase .text-link { color: #286a35; }
+
+/* The course deck uses a light green surface, so its heading needs dark ink. */
+.solutions .section-heading h2 { color: #163725; }
+.solutions .section-heading h2 em { color: #347a3b; }
+.solutions .section-heading .eyebrow { color: #4b744c; }
+.solutions .section-heading > p { color: #456b4d; }
+
+/* Floating social controls must not sit over reading content on tablets/phones. */
+@media (max-width: 900px) {
+  .social-rail { display: none; }
+}
+@media (max-width: 760px) {
+  .course-feedback-grid, .learner-testimonial-grid { grid-template-columns: 1fr; }
+  .course-feedback-card { min-height: 0; }
+  .whatsapp-float {
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    min-height: 50px;
+    justify-content: center;
+    padding: 10px;
+  }
+  .whatsapp-float b { display: none; }
+}
+
+.announcement-strip { justify-content: flex-start; gap: 12px 20px; padding: 10px clamp(16px, 4vw, 52px); }
+.announcement-label { flex: 0 0 auto; }
+.announcement-copy { flex: 1 1 300px; min-width: 0; animation: announcementEnter .38s cubic-bezier(.22, 1, .36, 1) both; }
+.announcement-copy b { display: block; color: #163725; font-size: 12px; }
+.announcement-copy p { margin: 3px 0 0; color: #405a36; font-size: 11px; line-height: 1.45; }
+.announcement-copy small { display: block; margin-top: 3px; }
+.announcement-actions { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.announcement-actions > a, .announcement-actions > button { min-height: 36px; padding: 7px 12px; }
+.announcement-community-link { opacity: .78; }
+.announcement-controls { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; color: #405a36; font: 10px var(--mono); }
+.announcement-controls button { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid rgba(19, 53, 31, .2); border-radius: 50%; background: transparent; color: #15351f; cursor: pointer; }
+.announcement-controls button:hover { background: rgba(255, 255, 255, .55); }
+@keyframes announcementEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 760px) {
+  .announcement-strip { justify-content: center; gap: 5px 9px; padding: 9px 12px; text-align: center; }
+  .announcement-label { flex-basis: 100%; }
+  .announcement-copy { flex-basis: 100%; }
+  .announcement-controls { margin-left: 0; }
+  .announcement-actions { justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) { .announcement-copy { animation: none; } }
