@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { FaWhatsapp, FaTelegram, FaInstagram, FaFacebookF, FaYoutube, FaLinkedinIn, FaXTwitter, FaLink, FaXmark, FaArrowUp, FaPaperPlane, FaClock, FaBorderAll, FaCompassDrafting, FaBullseye, FaCircleNotch, FaQuoteLeft, FaStar } from 'react-icons/fa6'
+import { whatsappDestination } from './whatsapp'
 
 const networks = { instagram: FaInstagram, facebook: FaFacebookF, youtube: FaYoutube, linkedin: FaLinkedinIn, telegram: FaTelegram, x: FaXTwitter, twitter: FaXTwitter }
 export function SocialDock({ links, telegramUrl }) {
@@ -20,13 +21,16 @@ export function WhatsAppPanel({ url }) {
   const close = () => { setOpen(false); trigger.current?.focus() }
   useEffect(() => { if (open) field.current?.focus() }, [open])
   if (!url) return null
-  const destination = new URL(url)
-  if (message.trim()) destination.searchParams.set('text', message.trim())
+  const submit = e => {
+    e.preventDefault()
+    if (!message.trim()) return
+    window.open(whatsappDestination(url, message), '_blank', 'noopener,noreferrer')
+  }
   return <>
     {open && <section className="m-chat" role="dialog" aria-label="Chat with Mubsa on WhatsApp" onKeyDown={e => { if (e.key === 'Escape') close() }}>
-      <header><FaWhatsapp /><div><strong>Mubsa Fin Institute</strong><small>Continue the conversation on WhatsApp</small></div><button onClick={close} aria-label="Close WhatsApp chat"><FaXmark /></button></header>
-      <div className="m-chat-body"><p>Hello! How can we help you?</p><span>Ask about courses, webinars, or your registration.</span></div>
-      <div className="m-chat-compose"><label htmlFor="whatsapp-message">Your message</label><textarea ref={field} id="whatsapp-message" value={message} onChange={e => setMessage(e.target.value)} maxLength={2000} rows={3} placeholder="Type your question…" /><a href={destination.href} target="_blank" rel="noreferrer" className="m-btn">Continue on WhatsApp <FaPaperPlane /></a></div>
+      <header><span className="m-chat-avatar"><FaWhatsapp aria-hidden="true" /></span><div><strong>Mubsa Fin Institute</strong><small>Chat on WhatsApp</small></div><button onClick={close} aria-label="Close WhatsApp chat"><FaXmark /></button></header>
+      <div className="m-chat-body"><p>Hi!<br />How can we help you?</p><span>Mubsa Fin Institute</span></div>
+      <form className="m-chat-compose" onSubmit={submit}><label className="m-chat-label" htmlFor="whatsapp-message">Your message</label><input ref={field} id="whatsapp-message" value={message} onChange={e => setMessage(e.target.value)} maxLength={2000} placeholder="Enter your message…" autoComplete="off" /><button className="m-chat-send" type="submit" disabled={!message.trim()} aria-label="Continue on WhatsApp" title="Continue on WhatsApp"><FaPaperPlane aria-hidden="true" /></button></form>
     </section>}
     <button ref={trigger} className="m-whatsapp" onClick={() => open ? close() : setOpen(true)} aria-label={open ? 'Close WhatsApp chat' : 'Chat on WhatsApp'} aria-expanded={open}>{open ? <FaXmark /> : <FaWhatsapp />}</button>
   </>
