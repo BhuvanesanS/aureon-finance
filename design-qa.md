@@ -1,5 +1,9 @@
 # Mubsa reference adaptation QA — 2026-11-10
 
+## Webinar landing update
+
+The reference masterclass page was inspected at desktop size, including its registration dialog. Mubsa's `/webinar` adapts the centered hero, benefit cards, mentor/learning sections, FAQ, repeated registration actions and fixed bottom bar to the approved green palette and supplied portraits. The actual webinar date and countdown come from published admin data; no artificial registration deadline or reference testimonials are used. Desktop 1280 × 800 and mobile 390 × 844 were inspected, the main-site webinar button and popup were exercised, horizontal overflow and browser errors were checked, and the existing API integration tests passed. The WhatsApp control was moved above the fixed registration bar after a mobile overlap was found. Final result for this update: passed.
+
 final result: passed
 
 Scope: the reference-inspired typography, navigation, hero actions, topic tiles, FAQ presentation, responsive controls and interactions in this change. This is not a certification that every Fortune Advisorz page or its private backend has been duplicated.
