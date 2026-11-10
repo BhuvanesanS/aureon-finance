@@ -1,0 +1,175 @@
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { FaWhatsapp, FaTelegram, FaSun, FaMoon, FaBars, FaXmark, FaArrowRight, FaPlay, FaChevronLeft, FaChevronRight, FaChartLine, FaCompass, FaClock, FaGraduationCap } from 'react-icons/fa6'
+import AdminDashboard from './AdminDashboard'
+import { defaultContent as defaults } from './siteDefaults'
+import './experience.css'
+
+const founder = '/client-founder.jpg'
+const portrait = '/client-portrait.jpg'
+const SiteContext = createContext({ content: defaults, whatsappUrl: '', telegramUrl: '' })
+const guide = [
+  ['Prepare before the market', 'Choose the market and timeframe you want to study. Mark the relevant highs, lows, and areas of interest. Write down what would change your view.'],
+  ['Read time and price together', 'Observe how price behaves around levels over time. Use technical concepts as questions to investigate, rather than as promises about the next move.'],
+  ['Define the risk first', 'Consider position size, invalidation, and potential loss before any trade. A setup is incomplete without a clear risk plan.'],
+  ['Review the process', 'Record your reasoning and outcome. Review whether you followed your plan, not simply whether a trade made money.'],
+]
+const topics = [['Time cycles', 'Study rhythm and recurring intervals.'], ['Square of nine', 'Explore numerical relationships in price.'], ['Natural ratios', 'Understand geometric market concepts.'], ['Gann angles', 'Study trend, time, and price relationships.'], ['Price targets', 'Plan scenarios with clear invalidation.']]
+const fmtDate = w => new Date(w.startsAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: w.timeZone || 'Asia/Kolkata' })
+
+export function Modal({ title, close, children, wide = false }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    const origin = document.activeElement
+    const dialog = ref.current
+    dialog.showModal()
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { dialog.close(); document.body.style.overflow = previous; origin?.focus?.() }
+  }, [])
+  return <dialog ref={ref} className={`m-dialog ${wide ? 'wide' : ''}`} aria-label={title} onCancel={e => { e.preventDefault(); close() }} onClick={e => { if (e.target === e.currentTarget) close() }}><div className="m-dialog-body"><button className="m-close" aria-label="Close popup" onClick={close}><FaXmark /></button>{children}</div></dialog>
+}
+
+function LeadForm({ webinar, subject = '', onSuccess }) {
+  const { content } = useContext(SiteContext)
+  const courses = content.courses
+  const [status, setStatus] = useState({})
+  const formRef = useRef()
+  async function submit(e) {
+    e.preventDefault()
+    const values = Object.fromEntries(new FormData(e.currentTarget))
+    setStatus({ busy: true })
+    try {
+      const body = webinar ? { ...values, name: values.fullName, webinarId: webinar.id, consent: true } : { ...values, message: `${subject ? `Subject: ${subject}\n` : ''}${values.message || ''}`, consent: true }
+      const response = await fetch(webinar ? '/api/webinar-registrations' : '/api/booking-requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      const data = await response.json()
+      if (!response.ok) { setStatus({ error: data.message, errors: data.errors || {} }); return }
+      setStatus({ success: true, reference: data.reference })
+      onSuccess?.()
+    } catch { setStatus({ error: 'We could not connect. Your details are still here. Please retry or contact us by phone.' }) }
+  }
+  if (status.success) return <div className="m-success" role="status"><h3>{webinar ? 'You’re registered.' : 'Your enquiry is saved.'}</h3><p>{webinar ? 'Keep this reference. Contact the team if you need joining details.' : 'The team will contact you using the details you provided.'}</p><strong>{status.reference}</strong><button className="m-btn secondary" onClick={() => setStatus({})}>Send another enquiry</button></div>
+  const error = name => status.errors?.[name] && <small className="m-error" id={`err-${name}`}>{status.errors[name]}</small>
+  return <form className="m-form" ref={formRef} onSubmit={submit}>
+    <div className="m-form-grid"><label>Full name<input name="fullName" autoComplete="name" minLength="2" maxLength="120" required aria-describedby="err-name" />{error('name')}{error('fullName')}</label><label>Email address<input name="email" autoComplete="email" type="email" maxLength="254" required />{error('email')}</label></div>
+    <label>Phone / WhatsApp<input name="phone" autoComplete="tel" type="tel" placeholder="Include country code" minLength="7" maxLength="30" required />{error('phone')}</label>
+    {webinar ? <div className="m-form-grid"><label>City<select name="city" defaultValue="" required><option value="" disabled>Select your city</option>{['Chennai', 'Coimbatore', 'Madurai', 'Bengaluru', 'Hyderabad', 'Mumbai', 'Delhi', 'Dubai', 'Other'].map(x => <option key={x}>{x}</option>)}</select>{error('city')}</label><label>Profession<select name="profession" defaultValue="" required><option value="" disabled>Select profession</option>{['Student', 'Business owner', 'Salaried professional', 'Finance professional', 'Homemaker', 'Educator', 'Other'].map(x => <option key={x}>{x}</option>)}</select>{error('profession')}</label></div> : <><label>Course of interest<select name="course" defaultValue={courses.find(c => c.name === subject)?.name || courses[0].name}>{courses.map(c => <option key={c.slug}>{c.name}</option>)}</select>{error('course')}</label><label>Your message<textarea name="message" rows="3" maxLength="2000" /></label></>}
+    <label className="m-consent"><input type="checkbox" required name="consent" />I agree to be contacted about this {webinar ? 'webinar' : 'enquiry'}.</label>
+    {status.error && <div className="m-error" role="alert">{status.error}{error('webinarId')}</div>}
+    <button className="m-btn" disabled={status.busy}>{status.busy ? 'Saving…' : webinar ? webinar.ctaLabel || content.registrationLabel : 'Send enquiry'} <FaArrowRight /></button>
+  </form>
+}
+
+function FAQ({ full = false }) {
+  const { content } = useContext(SiteContext)
+  const questions = content.faqs.map(faq => [faq.category,faq.question,faq.answer])
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('All')
+  const [expanded, setExpanded] = useState(full)
+  const filtered = questions.filter(([c, q, a]) => (category === 'All' || c === category) && `${q} ${a}`.toLowerCase().includes(search.toLowerCase()))
+  return <section className="m-section" id="faq"><Heading eyebrow="HELP CENTER" title="Frequently asked questions" text="A little clarity before your next step." /><div className="m-faq"><label className="m-search">Search questions<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search courses, trading, support…" /></label><div className="m-chips">{['All', ...new Set(questions.map(q => q[0]))].map(c => <button key={c} aria-pressed={category === c} onClick={() => setCategory(c)}>{c}</button>)}</div>{(expanded ? filtered : filtered.slice(0, 4)).map(([, q, a]) => <details key={q}><summary>{q}</summary><p>{a}</p></details>)}{!filtered.length && <p role="status">No matching questions. Try another search.</p>}{filtered.length > 4 && <button className="m-text" onClick={() => setExpanded(!expanded)}>{expanded ? 'Show fewer' : 'View more answers'} <FaArrowRight /></button>}</div></section>
+}
+function Heading({ eyebrow, title, text }) { return <div className="m-heading"><p className="m-kicker">{eyebrow}</p><h2>{title}</h2>{text && <p>{text}</p>}</div> }
+function Graph() { return <svg className="m-chart" viewBox="0 0 600 300" aria-label="Illustrative price and time study, not live market data" role="img"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="currentColor" opacity=".12" /></pattern></defs><rect width="600" height="300" fill="url(#grid)" /><path d="M0 260L85 215L140 240L210 150L270 170L335 85L410 120L480 40L540 70L600 12" fill="none" stroke="currentColor" strokeWidth="3" /><path d="M0 290L600 0M0 290L600 140M0 290L300 0" fill="none" stroke="currentColor" opacity=".3" /><text x="18" y="26" fill="currentColor" fontSize="11">ILLUSTRATIVE TIME / PRICE STUDY</text></svg> }
+
+function Gallery({ items, open }) {
+  const [city, setCity] = useState('All')
+  return <section className="m-section" id="gallery"><Heading eyebrow="OUR COMMUNITY" title="Moments of learning." text="Meet the people and ideas behind Mubsa." /><div className="m-chips">{['All', ...new Set(items.map(x => x.city))].map(c => <button aria-pressed={city === c} key={c} onClick={() => setCity(c)}>{c}</button>)}</div><div className="m-gallery">{items.filter(x => city === 'All' || x.city === city).map((x, i) => <button key={`${x.title}-${i}`} onClick={() => open({ type: 'image', item: x })}><img src={x.image} alt={x.title} loading="lazy" /><span>{x.title}<small>{x.city}</small></span></button>)}</div>{!items.length && <div className="m-empty">Event memories will be shared here after our next published session.<button className="m-text" onClick={() => open({ type: 'webinar' })}>Ask about upcoming sessions <FaArrowRight /></button></div>}</section>
+}
+function Feedback({ items }) {
+  const [index, setIndex] = useState(0)
+  const current = items[index % Math.max(1, items.length)]
+  return <section className="m-section m-tone" id="testimonials"><Heading eyebrow="LEARNER VOICES" title="A journey best told by you." text="Feedback from the Mubsa learning community." />{current ? <div className="m-quote"><blockquote>“{current.quote}”</blockquote><strong>{current.name}</strong><p>{current.role}</p><div className="m-controls"><button aria-label="Previous testimonial" onClick={() => setIndex((index - 1 + items.length) % items.length)}><FaChevronLeft /></button><span>{index % items.length + 1} / {items.length}</span><button aria-label="Next testimonial" onClick={() => setIndex(index + 1)}><FaChevronRight /></button></div></div> : <p className="m-empty">Learner stories will be published with permission. No trading results are guaranteed.</p>}</section>
+}
+function SocialLinks() {
+  const { content, telegramUrl } = useContext(SiteContext)
+  return <div className="m-social-links" aria-label="Social media links">{telegramUrl && <a href={telegramUrl} target="_blank" rel="noreferrer">Telegram ↗</a>}{content.socialLinks.map(link => <a key={link.label + link.url} href={link.url} target="_blank" rel="noreferrer">{link.label} ↗</a>)}</div>
+}
+function Contact() {
+  const { content, whatsappUrl } = useContext(SiteContext)
+  const { title, description, location, email, phone } = content.contact
+  return <section className="m-section m-contact" id="contact"><div><p className="m-kicker">CONTACT US</p><h2>{title}</h2><p>{description}</p><dl><dt>BASED IN</dt><dd>{location}</dd><dt>EMAIL US</dt><dd><a href={`mailto:${email}`}>{email}</a></dd><dt>CALL US</dt><dd><a href={`tel:${phone.replace(/[^+0-9]/g,'')}`}>{phone}</a></dd></dl>{whatsappUrl && <a className="m-text" href={whatsappUrl} target="_blank" rel="noreferrer"><FaWhatsapp /> Chat on WhatsApp</a>}<SocialLinks /></div><LeadForm /></section>
+}
+function Funds({ open }) {
+  const [monthly, setMonthly] = useState(5000), [years, setYears] = useState(10), [rate, setRate] = useState(8)
+  const months = years * 12, r = rate / 1200, invested = monthly * months, projected = r ? monthly * ((1 + r) ** months - 1) / r : invested
+  const money = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
+  return <section className="m-section m-contact"><div><p className="m-kicker">MUTUAL FUND EDUCATION</p><h1>Understand compounding.</h1><p>Explore how a regular contribution and an assumed return affect a hypothetical investment. This illustration excludes fees, taxes, and changing returns; it is not a forecast or recommendation.</p><button className="m-btn" onClick={() => open({ type: 'enquiry', subject: 'Mutual fund education' })}>Ask the team <FaArrowRight /></button></div><div className="m-card m-form"><label>Monthly contribution (₹)<input type="number" min="0" max="10000000" value={monthly} onChange={e => setMonthly(Math.max(0, Math.min(10000000, Number(e.target.value))))} /></label><label>Years: {years}<input type="range" min="1" max="40" value={years} onChange={e => setYears(Number(e.target.value))} /></label><label>Assumed annual return (%): {rate}<input type="range" min="0" max="20" value={rate} onChange={e => setRate(Number(e.target.value))} /></label><p>Contributed <strong>{money(invested)}</strong></p><p>Illustrative value <strong>{money(projected)}</strong></p></div></section>
+}
+
+export default function MubsaExperience() {
+  const [path, setPath] = useState(window.location.pathname)
+  const [menu, setMenu] = useState(false), [more, setMore] = useState(false)
+  const [theme, setTheme] = useState(() => { try { return localStorage.getItem('mubsa-theme') || 'dark' } catch { return 'dark' } })
+  const [data, setData] = useState({ content: defaults, slides: [] }), [loaded, setLoaded] = useState(false), [offline, setOffline] = useState(false)
+  const [modal, setModal] = useState(null), [slide, setSlide] = useState(0), [intro, setIntro] = useState(0), [book, setBook] = useState(0)
+  const [copyrightYear] = useState(() => new Date().getFullYear())
+  const [rotationPaused, setRotationPaused] = useState(false)
+  useEffect(() => {
+    if (rotationPaused || data.slides.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const timer = setInterval(() => setSlide(i => i + 1), 6500)
+    return () => clearInterval(timer)
+  }, [rotationPaused, data.slides.length])
+  const seen = useRef(false)
+  const content = { ...defaults, ...data.content }
+  const courses = content.courses
+  const { phone, email } = content.contact
+  const introCourse = courses[intro % courses.length]
+  const go = (url) => { window.history.pushState({}, '', url); setPath(url.split('#')[0] || '/'); setMenu(false); setMore(false); if (url.includes('#')) setTimeout(() => document.getElementById(url.split('#')[1])?.scrollIntoView(), 0); else window.scrollTo(0, 0) }
+  useEffect(() => { const pop = () => { setPath(location.pathname); setMenu(false) }; window.addEventListener('popstate', pop); return () => window.removeEventListener('popstate', pop) }, [])
+  useEffect(() => { document.title = 'Mubsa Fin Institute | Market Education'; document.documentElement.dataset.theme = theme; try { localStorage.setItem('mubsa-theme', theme) } catch {} }, [theme])
+  useEffect(() => {
+    if (path === '/admin') return
+    let active = true
+    const refresh = async () => { try { const res = await fetch('/api/site-content'); if (!res.ok) throw Error(); const result = await res.json(); if (active) { setData(result); setOffline(false) } } catch { if (active) setOffline(true) } finally { if (active) setLoaded(true) } }
+    refresh(); const timer = setInterval(refresh, 30000)
+    return () => { active = false; clearInterval(timer) }
+  }, [path])
+  useEffect(() => { if (!loaded || path !== '/' || seen.current || modal || !content.popupEnabled) return; let dismissed = false; try { dismissed = sessionStorage.getItem('mubsa-welcome') === 'seen' } catch {} if (dismissed) return; const timer = setTimeout(() => { seen.current = true; try { sessionStorage.setItem('mubsa-welcome', 'seen') } catch {} setModal({ type: 'welcome' }) }, content.popupDelay * 1000); return () => clearTimeout(timer) }, [loaded, path, modal, content.popupEnabled, content.popupDelay])
+  const close = () => { if (modal?.type === 'welcome') { try { sessionStorage.setItem('mubsa-welcome', 'seen') } catch {} } setModal(null) }
+  const open = value => { seen.current = true; setModal(value) }
+  if (path === '/admin' || path === '/login') return <AdminDashboard />
+  const webinar = data.webinar
+  const activeSlide = data.slides?.[slide % Math.max(1, data.slides.length)]
+  const routeCourse = courses.find(c => path === `/courses/${c.slug}`)
+  const navLink = (label, href) => <a href={href} onClick={e => { e.preventDefault(); go(href) }}>{label}</a>
+  const community = () => data.telegramUrl ? window.open(data.telegramUrl, '_blank', 'noopener,noreferrer') : open({ type: 'enquiry', subject: 'Community updates' })
+  const gallery = content.gallery
+  const policySlug = path.startsWith('/policies/') ? path.split('/').pop() : ''
+  const policy = content.policies.find(x => x.slug === policySlug)
+  const isHome = path === '/'
+  return <SiteContext.Provider value={{ ...data, content }}><div className="mubsa-site"><a className="m-skip" href="#main-content">Skip to content</a>
+    <header className="m-header"><a href="/" className="m-brand" onClick={e => { e.preventDefault(); go('/') }}><span>M</span><div>MUBSA<small>FIN INSTITUTE</small></div></a><button className="m-mobile" aria-label="Toggle navigation" aria-expanded={menu} onClick={() => setMenu(!menu)}>{menu ? <FaXmark /> : <FaBars />}</button><nav className={menu ? 'open' : ''} aria-label="Main navigation">{navLink('Home', '/')}{navLink('About', '/#about')}{navLink('Services', '/#services')}{navLink('Mutual Funds', '/mutual-funds')}<div className="m-more"><button aria-expanded={more} onClick={() => setMore(!more)}>More ▾</button>{more && <div onKeyDown={e => { if (e.key === 'Escape') setMore(false) }}>{[['Courses','/courses'],['Events','/events'],['Team','/#team'],['Testimonials','/testimonials'],['Study guide','/#book'],['FAQs','/faq'],['Contact','/contact']].map(([label, url]) => <span key={url}>{navLink(label, url)}</span>)}</div>}</div></nav><div className="m-header-actions"><button className="m-icon" aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <FaSun /> : <FaMoon />}</button>{navLink('Login', '/login')}<button className="m-btn small" onClick={community}>{content.communityLabel} <FaArrowRight /></button></div></header>
+    {offline && <div className="m-offline" role="status">The online services are unavailable. Please retry shortly or call {phone}.</div>}
+    {activeSlide && <aside className="m-announcement" onFocus={() => setRotationPaused(true)}><span>{activeSlide.label}</span><p>{activeSlide.title}{activeSlide.type === 'session' && <> · {fmtDate(activeSlide)} ({activeSlide.timeZone})</>}</p><button onClick={() => activeSlide.type === 'session' ? open({ type: 'webinar', webinar: activeSlide }) : activeSlide.href?.startsWith('/') ? go(activeSlide.href) : activeSlide.href ? window.open(activeSlide.href, '_blank', 'noopener,noreferrer') : community()}>{activeSlide.ctaLabel || 'Explore'} <FaArrowRight /></button>{data.slides.length > 1 && <div className="m-controls"><button aria-label="Previous announcement" onClick={() => setSlide((slide - 1 + data.slides.length) % data.slides.length)}><FaChevronLeft /></button><span>{slide % data.slides.length + 1}/{data.slides.length}</span><button aria-label={rotationPaused ? 'Resume announcements' : 'Pause announcements'} onClick={() => setRotationPaused(!rotationPaused)}>{rotationPaused ? '▶' : 'Ⅱ'}</button><button aria-label="Next announcement" onClick={() => setSlide(slide + 1)}><FaChevronRight /></button></div>}</aside>}
+    <main id="main-content">
+    {isHome && <><section className="m-hero"><div className="m-hero-copy"><p className="m-kicker">KNOWLEDGE. DISCIPLINE. PERSPECTIVE.</p><h1>Your journey to<br /><em>confident market</em><br />understanding.</h1><p>Study stock markets, price action, time cycles, and risk management with Mubsa Fin Institute. Build a repeatable process—from your first chart to advanced technical analysis.</p><div className="m-actions"><button className="m-btn" onClick={() => open({ type: 'webinar' })}>{webinar?.ctaLabel || content.registrationLabel} <FaArrowRight /></button><a className="m-btn secondary" href="#services">Explore courses</a></div><button className="m-video" onClick={() => open({ type: 'insight' })}><span><FaPlay /></span>Watch a free insight</button></div><div className="m-hero-image"><img src={founder} alt="Mubarak Ahmad, founder of Mubsa Fin Institute" fetchPriority="high" width="960" height="1440" /><div className="m-mentor-label"><small>YOUR MENTOR</small><strong>Mubarak Ahmad</strong><span>Founder & Academic Director</span></div></div></section><div className="m-principles">{[['01','Structured learning'],['02','Multiple markets'],['03','Time & price study'],['04','Risk comes first']].map(([n,t]) => <div key={n}><strong>{n}</strong><span>{t}</span></div>)}</div>
+    <section className="m-section m-intro" id="about"><div><p className="m-kicker">WHO WE ARE</p><h2>A clearer way<br />to learn markets.</h2><p>Mubsa brings market education into a structured learning journey. Study charts, explore technical methods, and put risk awareness at the centre of your process.</p><button className="m-text" onClick={() => open({ type: 'vision' })}>Discover our vision <FaArrowRight /></button></div><div className="m-card"><p className="m-kicker">{String(intro + 1).padStart(2,'0')} / LEARNING PATH</p><FaGraduationCap className="m-large-icon" /><h3>{introCourse.name}</h3><p>{introCourse.description}</p><div className="m-controls"><button aria-label="Previous introduction" onClick={() => setIntro((intro + courses.length - 1) % courses.length)}><FaChevronLeft /></button><span>{intro % courses.length + 1} / {courses.length}</span><button aria-label="Next introduction" onClick={() => setIntro((intro + 1) % courses.length)}><FaChevronRight /></button></div></div></section>
+    <section className="m-section m-intro m-tone"><div><p className="m-kicker">A PRACTICAL FRAMEWORK</p><h2>Bring time and price<br />into focus.</h2><p>Understand market structure, observe cycles, and build a plan that considers uncertainty.</p>{[['Market structure','Support, resistance, and price action'],['Time analysis','Cycles, rhythm, and context'],['Risk planning','Position size, invalidation, and review']].map(([t,d],i) => <div className="m-focus-row" key={t}><span>0{i+1}</span><div><strong>{t}</strong><p>{d}</p></div></div>)}</div><div className="m-chart-panel"><Graph /><span>PREPARATION BEFORE PREDICTION</span></div></section>
+    <section className="m-section" id="gann"><Heading eyebrow="TIME + PRICE" title="Explore the Gann framework." text="A structured study of price, time, and geometric relationships." /><div className="m-topic-grid">{topics.map(([title,text],i) => <button className="m-card" key={title} onClick={() => open({ type: 'topic', title, text })}><span className="m-topic-symbol">{['◷','▦','◎','∠','↗'][i]}</span><h3>{title}</h3><p>{text}</p><span className="m-text">Explore concept <FaArrowRight /></span></button>)}</div><div className="m-center"><button className="m-btn" onClick={() => go(`/courses/${courses.find(c => c.slug === 'advanced')?.slug || courses[courses.length-1].slug}`)}>Explore full curriculum <FaArrowRight /></button></div></section></>}
+    {(isHome || path === '/courses' || path === '/services') && <section className="m-section m-tone" id="services"><Heading eyebrow="OUR EXPERTISE" title="Build your market knowledge." text="A progressive path from market foundations to advanced analytical methods." /><div className="m-course-grid">{courses.map((c,i) => <article className="m-card" key={c.slug}><span className="m-course-number">0{i+1}</span>{[<FaCompass key="a" />,<FaChartLine key="b" />,<FaClock key="c" />][i % 3]}<p className="m-kicker">{c.tagline}</p><h3>{c.name}</h3><p>{c.description}</p><button className="m-text" onClick={() => go(`/courses/${c.slug}`)}>View curriculum <FaArrowRight /></button></article>)}</div><div className="m-center"><button className="m-btn secondary" onClick={() => open({ type: 'enquiry', subject: 'Course guidance' })}>Help me choose a course</button></div></section>}
+    {routeCourse && <section className="m-section"><p className="m-kicker">COURSE CURRICULUM</p><h1>{routeCourse.name}</h1><p className="m-kicker">{routeCourse.tagline}</p><p className="m-lead">{routeCourse.intro || routeCourse.description}</p>{routeCourse.focusTitle && <h2>{routeCourse.focusTitle}</h2>}{routeCourse.focus && <p className="m-lead">{routeCourse.focus}</p>}<button className="m-btn" onClick={() => open({ type: 'enquiry', subject: routeCourse.name })}>Enquire about this course <FaArrowRight /></button><div className="m-modules">{routeCourse.modules.map(([title,desc,items],i) => <details key={title} open={i === 0}><summary><small>MODULE {i+1}</small>{title}</summary><p>{desc}</p><ul>{items.map(x => <li key={x}>{x}</li>)}</ul></details>)}</div></section>}
+    {isHome && <section className="m-section m-book-section" id="book"><div><p className="m-kicker">THE MUBSA STUDY NOTES</p><h2>A process you<br />can return to.</h2><p>An introductory four-part reading guide to preparation, time and price, risk, and review.</p><div className="m-actions"><button className="m-btn" onClick={() => open({ type: 'guide' })}>View study guide <FaArrowRight /></button><button className="m-text" onClick={() => open({ type: 'enquiry', subject: 'Study guide' })}>Enquire now</button></div></div><div className="m-book"><small>MUBSA FIN INSTITUTE / LEARNING NOTES</small><span>THE<br />MARKET<br /><em>METHOD.</em></span><div className="m-book-page"><b>{guide[book][0]}</b><p>{guide[book][1]}</p></div><div className="m-controls"><button aria-label="Previous guide page" onClick={() => setBook((book + 3) % 4)}><FaChevronLeft /></button><span>{book+1} / 4</span><button aria-label="Next guide page" onClick={() => setBook((book+1) % 4)}><FaChevronRight /></button></div></div></section>}
+    {(isHome || path === '/events') && data.webinars?.length > 0 && <section className="m-section m-tone" id="seminars"><Heading eyebrow="UPCOMING SEMINARS" title="Learn with us, live." text="Choose a session and reserve your place." /><div className="m-course-grid">{data.webinars.map(event => <article className="m-card" key={event.id}><p className="m-kicker">{fmtDate(event)} · {event.timeZone}</p><h3>{event.title}</h3><p>{event.description}</p><p>{event.speaker} · {event.durationMinutes} minutes</p><button className="m-btn" onClick={() => open({ type:'webinar', webinar:event })}>{event.ctaLabel || content.registrationLabel} <FaArrowRight /></button></article>)}</div></section>}
+    {(isHome || path === '/events') && <Gallery items={gallery} open={open} />}
+    {(isHome || path === '/about' || path === '/team') && <section className="m-section m-team" id="team"><div className="m-team-image"><img src={portrait} alt="Mubarak Ahmad" width="912" height="1136" loading="lazy" /></div><div><p className="m-kicker">MEET YOUR MENTOR</p><h2>Mubarak Ahmad.</h2><p className="m-gold">Founder & Academic Director</p><p>A share-market educator based in Dubai, Mubarak brings an emphasis on preparation, patience, and risk awareness to the classroom.</p><p>His mission is to help people build a stronger understanding of markets through structured education and consistent practice.</p><blockquote>“Learn with purpose. Move forward with knowledge.”</blockquote><button className="m-btn secondary" onClick={() => open({ type: 'enquiry', subject: 'Mentorship' })}>Meet the learning team <FaArrowRight /></button></div></section>}
+    {(isHome || path === '/testimonials') && <Feedback items={content.testimonials} />}
+    {isHome && <section className="m-community"><FaTelegram /><div><h2>Keep learning. Together.</h2><p>Connect with the team for session announcements and market learning updates.</p></div><button className="m-btn" onClick={community}>{content.communityLabel} <FaArrowRight /></button></section>}
+    {(isHome || path === '/faq') && <FAQ full={!isHome} />}
+    {(isHome || path === '/contact' || path === '/booking') && <Contact />}
+    {path === '/mutual-funds' && <Funds open={open} />}
+    {policySlug && <section className="m-section m-policy"><p className="m-kicker">MUBSA FIN INSTITUTE</p><h1>{policy?.title || policySlug.replaceAll('-', ' ')}</h1><p>{policy?.body || (policySlug === 'risk-disclaimer' ? 'Trading and investing involve risk, including loss of capital. Mubsa provides educational information, not personalised investment advice. No course, research method, or webinar guarantees profit or future results.' : 'Please contact Mubsa Fin Institute for the current terms applicable to your course or enquiry. Confirm the schedule, fees, cancellation terms, and data-use details with the team before enrolling.')}</p><a href={`mailto:${email}`}>{email}</a></section>}
+    {!isHome && !routeCourse && !policySlug && !['/courses','/services','/events','/about','/team','/testimonials','/faq','/contact','/booking','/mutual-funds'].includes(path) && <section className="m-section"><h1>Page not found.</h1><button className="m-btn" onClick={() => go('/')}>Back to home</button></section>}
+    </main>
+    <footer className="m-footer"><div><a className="m-brand" href="/"><span>M</span><div>MUBSA<small>FIN INSTITUTE</small></div></a><p>Knowledge for the journey.<br />Discipline for the long term.</p><a href={`mailto:${email}`}>{email}</a><a href={`tel:${phone.replace(/[^+0-9]/g,'')}`}>{phone}</a><SocialLinks /></div><div><h3>Company</h3>{navLink('About us','/#about')}{navLink('Our courses','/courses')}{navLink('Meet the team','/#team')}{navLink('Events','/events')}</div><div><h3>Legal</h3>{['risk-disclaimer','terms-and-conditions','privacy-policy','refund-policy'].map(slug => <span key={slug}>{navLink(slug.replaceAll('-',' '), `/policies/${slug}`)}</span>)}</div><div><h3>Helpful links</h3>{navLink('FAQs','/faq')}{navLink('Feedback','/testimonials')}{navLink('Study guide','/#book')}{navLink('Contact us','/contact')}<button onClick={() => open({ type: 'welcome' })}>Show welcome popup</button></div><div className="m-footer-bottom">© {copyrightYear} Mubsa Fin Institute. Educational information only. Trading involves risk.</div></footer>
+    {data.whatsappUrl && <a className="m-whatsapp" href={data.whatsappUrl} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp"><FaWhatsapp /></a>}<button className="m-top" aria-label="Back to top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>↑</button>
+    {modal && <Modal title={modal.type === 'welcome' ? 'Welcome to Mubsa' : modal.title || modal.type} close={close} wide={['welcome','guide','image'].includes(modal.type)}>
+      {modal.type === 'welcome' && <div className="m-welcome"><img src={founder} alt="Mubarak Ahmad" /><div><p className="m-kicker">MUBSA FIN INSTITUTE</p><h2>{content.popupTitle}</h2><p>{content.popupText}</p>{webinar && <p><strong>{webinar.title}</strong><br />{fmtDate(webinar)} · {webinar.timeZone}</p>}<p className="m-gold">Mubarak Ahmad<br /><small>Founder & Academic Director</small></p><button className="m-btn" onClick={() => open({ type: 'webinar' })}>{webinar?.ctaLabel || content.registrationLabel} <FaArrowRight /></button><button className="m-text" onClick={() => { close(); go('/courses') }}>Explore courses</button></div></div>}
+      {['enquiry','webinar'].includes(modal.type) && <><p className="m-kicker">{modal.type === 'webinar' ? 'FREE LIVE LEARNING' : 'LET’S TALK'}</p><h2>{modal.type === 'webinar' ? (modal.webinar || webinar)?.title || 'Hear about the next webinar.' : modal.subject || 'Course enquiry'}</h2>{modal.type === 'webinar' && ((modal.webinar || webinar) ? <p>{fmtDate(modal.webinar || webinar)} · {(modal.webinar || webinar).timeZone || 'Asia/Kolkata'}<br />{(modal.webinar || webinar).durationMinutes} minutes</p> : <p>No session is currently open for registration. Leave an enquiry to ask about the next announcement.</p>)}{modal.type === 'webinar' && (modal.webinar || webinar)?.registrationUrl ? <a className="m-btn" href={(modal.webinar || webinar).registrationUrl} target="_blank" rel="noreferrer">{(modal.webinar || webinar).ctaLabel || content.registrationLabel} <FaArrowRight /></a> : <LeadForm webinar={modal.type === 'webinar' ? modal.webinar || webinar : null} subject={modal.type === 'webinar' ? 'Next webinar updates' : modal.subject} />}</>}
+      {modal.type === 'image' && <figure className="m-lightbox"><img src={modal.item.image} alt={modal.item.title} /><figcaption>{modal.item.title} · {modal.item.city}</figcaption></figure>}
+      {modal.type === 'guide' && <><p className="m-kicker">MUBSA STUDY GUIDE</p><h2>The market method.</h2>{guide.map(([t,p],i) => <article className="m-guide-page" key={t}><small>0{i+1}</small><h3>{t}</h3><p>{p}</p></article>)}</>}
+      {modal.type === 'topic' && <><p className="m-kicker">ADVANCED LEARNING</p><h2>{modal.title}</h2><p>{modal.text} Explore this concept in context, test assumptions, and consider risk. It is a study tool, not a guarantee of future price movement.</p><button className="m-btn" onClick={() => { close(); go(`/courses/${courses.find(c => c.slug === 'advanced')?.slug || courses[courses.length-1].slug}`) }}>View advanced curriculum <FaArrowRight /></button></>}
+      {modal.type === 'vision' && <><p className="m-kicker">OUR VISION</p><h2>Build understanding.<br />Then build your process.</h2><p>Our mission is to make market learning clearer and more accessible. We bring foundations, chart study, and risk planning into a progressive educational path for working professionals and dedicated learners.</p><button className="m-btn" onClick={() => { close(); go('/about') }}>Meet your mentor <FaArrowRight /></button></>}
+      {modal.type === 'insight' && <><p className="m-kicker">FREE LEARNING INSIGHT</p><h2>Preparation before prediction.</h2><p>Begin with a timeframe, mark relevant price levels, and define what would invalidate your idea. Record the plan before looking for a result.</p>{content.videoUrl ? <a className="m-btn" href={content.videoUrl} target="_blank" rel="noreferrer">Watch the mentor’s video <FaPlay /></a> : <p>The next video insight will be announced here. You can explore the free study notes now.</p>}<button className="m-text" onClick={() => open({ type: 'guide' })}>Read free study notes <FaArrowRight /></button></>}
+    </Modal>}
+  </div></SiteContext.Provider>
+}

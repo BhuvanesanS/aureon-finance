@@ -2,6 +2,7 @@ import { createServer } from 'node:http'
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, extname, join, resolve, sep } from 'node:path'
+import { defaultContent, validateContent } from './content.js'
 
 const storePath = join(process.env.DATA_DIR || join(resolve('.'), 'server', 'data'), 'records.json')
 const staticDirectory = resolve('dist')
@@ -27,6 +28,8 @@ const contentTypes = {
   '.js': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
   '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
   '.svg': 'image/svg+xml',
   '.webp': 'image/webp',
   '.woff': 'font/woff',
@@ -130,7 +133,7 @@ function validHttpsUrl(value, allowedHosts = []) {
     const url = new URL(value)
     const hostname = url.hostname.toLowerCase()
     const zoomHost = hostname === 'zoom.us' || hostname.endsWith('.zoom.us') || hostname === 'zoom.com' || hostname.endsWith('.zoom.com')
-    return url.protocol === 'https:' && (!allowedHosts.length || allowedHosts.includes(hostname) || (allowedHosts.includes('*.zoom.us') && zoomHost))
+    return url.protocol === 'https:' && !url.username && !url.password && (!allowedHosts.length || allowedHosts.includes(hostname) || (allowedHosts.includes('*.zoom.us') && zoomHost))
   } catch {
     return false
   }
@@ -280,8 +283,8 @@ async function sendWhatsApp(registration, webinar) {
 
 function publicWebinar(webinar) {
   if (!webinar) return null
-  const { id, title, description, startsAt, durationMinutes, timeZone, speaker, joinUrl } = webinar
-  return { id, title, description, startsAt, durationMinutes, timeZone, speaker, joinUrl }
+  const { id, title, description, startsAt, durationMinutes, timeZone, speaker, joinUrl, registrationUrl, ctaLabel } = webinar
+  return { id, title, description, startsAt, durationMinutes, timeZone, speaker, joinUrl, registrationUrl, ctaLabel }
 }
 
 export function createApiServer() {
@@ -308,18 +311,15 @@ export function createApiServer() {
       const store = await readStore()
       const webinars = store.webinars.filter((item) => item.status === 'published' && Date.parse(item.startsAt) > Date.now()).sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))
       const spotlights = (store.spotlights || []).filter((item) => item.status === 'published' && (!item.expiresAt || Date.parse(item.expiresAt) > Date.now()))
-      const evergreenSlides = [
-        { id: 'course-basic', type: 'promotion', label: 'COURSE SPOTLIGHT', title: 'Build your market foundations', description: 'Explore market fundamentals, trading terms, chart reading, candlesticks, and market structure.', ctaLabel: 'Explore Basic Course', href: '/courses/basic' },
-        { id: 'course-intermediate', type: 'promotion', label: 'COURSE SPOTLIGHT', title: 'Take your chart analysis further', description: 'Study liquidity, technical concepts, trade planning, and risk awareness.', ctaLabel: 'Explore Intermediate', href: '/courses/intermediate' },
-        { id: 'course-advanced', type: 'promotion', label: 'COURSE SPOTLIGHT', title: 'Explore advanced market methods', description: 'Discover planned study areas including Elliott Wave, Pitchfork, and Gann methods.', ctaLabel: 'Explore Advanced', href: '/courses/advanced' },
-      ]
+      const content = { ...defaultContent, ...store.settings.content }
+      const evergreenSlides = content.courses.map(course => ({ id: `course-${course.slug}`, type:'promotion', label:'COURSE SPOTLIGHT', title:course.name, description:course.description, ctaLabel:'Explore course', href:`/courses/${course.slug}` }))
       const slides = [
-        ...webinars.map((item) => ({ id: item.id, type: 'session', label: 'UPCOMING LIVE SESSION', title: item.title, description: item.description, startsAt: item.startsAt, timeZone: item.timeZone, speaker: item.speaker, durationMinutes: item.durationMinutes, joinUrl: item.joinUrl, ctaLabel: 'Save your free place', href: '' })),
+        ...webinars.map((item) => ({ id: item.id, type: 'session', label: 'UPCOMING LIVE SESSION', title: item.title, description: item.description, startsAt: item.startsAt, timeZone: item.timeZone, speaker: item.speaker, durationMinutes: item.durationMinutes, joinUrl: item.joinUrl, registrationUrl: item.registrationUrl || '', ctaLabel: item.ctaLabel || content.registrationLabel, href: '' })),
         ...spotlights.map(({ id, type, title, description, ctaLabel, href }) => ({ id, type, label: type === 'collaboration' ? 'COLLABORATION' : 'FEATURED ANNOUNCEMENT', title, description, ctaLabel, href })),
         ...evergreenSlides,
       ].slice(0, 8)
       const webinar = webinars[0] || null
-      send(response, 200, { webinar: publicWebinar(webinar), slides, telegramUrl: store.settings.telegramUrl, whatsappUrl: store.settings.whatsappUrl })
+      send(response, 200, { webinar: publicWebinar(webinar), slides, telegramUrl: store.settings.telegramUrl, whatsappUrl: store.settings.whatsappUrl, content, webinars: webinars.map(publicWebinar) })
       return
     }
 
@@ -370,7 +370,7 @@ export function createApiServer() {
         delivery: { email, whatsapp },
         message: email === 'accepted' && whatsapp === 'accepted'
           ? 'You are registered. Webinar details have been accepted by the email and WhatsApp providers.'
-          : 'Your registration is saved. One or more message providers still need configuration or returned a delivery error.',
+          : 'Your registration is saved. Please keep your reference and contact the team if you need joining details.',
       })
       return
     }
@@ -400,7 +400,8 @@ export function createApiServer() {
       if (booking.fullName.length < 2) errors.fullName = 'Enter your full name.'
       if (!emailIsValid(booking.email)) errors.email = 'Enter a valid email address.'
       if (booking.phone.replace(/\D/g, '').length < 7) errors.phone = 'Enter a valid phone number.'
-      if (!['Basic Course', 'Intermediate Course', 'Advanced Course'].includes(booking.course)) errors.course = 'Choose one of the available courses.'
+      const bookingStore = await readStore()
+      if (!(bookingStore.settings.content?.courses || defaultContent.courses).some(course => course.name === booking.course)) errors.course = 'Choose one of the available courses.'
       if (!booking.consent) errors.consent = 'Consent is required before submitting a request.'
       if (Object.keys(errors).length) {
         send(response, 422, { message: 'Please correct the highlighted information.', errors })
@@ -441,6 +442,30 @@ export function createApiServer() {
 
     if (url.pathname.startsWith('/api/admin/')) {
       if (!requireAdmin(request, response)) return
+      if (method === 'GET' && url.pathname === '/api/admin/content') {
+        const store = await readStore()
+        send(response, 200, { ...defaultContent, ...store.settings.content })
+        return
+      }
+      if (method === 'PUT' && url.pathname === '/api/admin/content') {
+        let content
+        try { const previous = await readStore(); content = validateContent({ ...defaultContent, ...previous.settings.content, ...await readJson(request) }) }
+        catch (error) { send(response, 422, { message: error.message }); return }
+        await updateStore((store) => { store.settings.content = content })
+        send(response, 200, content)
+        return
+      }
+      if (method === 'PATCH' && /^\/api\/admin\/bookings\/[\w-]+$/.test(url.pathname)) {
+        const { status } = await readJson(request)
+        if (!['requested', 'contacted', 'closed'].includes(status)) { send(response, 422, { message: 'Choose a valid enquiry status.' }); return }
+        const saved = await updateStore((store) => {
+          const booking = store.bookings.find((item) => item.id === url.pathname.split('/').at(-1))
+          if (booking) booking.status = status
+          return booking
+        })
+        send(response, saved ? 200 : 404, saved || { message: 'Enquiry not found.' })
+        return
+      }
       if (method === 'GET' && url.pathname === '/api/admin/dashboard') {
         const store = await readStore()
         send(response, 200, { settings: store.settings, webinars: store.webinars, spotlights: store.spotlights || [], registrations: store.registrations, bookings: store.bookings })
@@ -514,7 +539,7 @@ export function createApiServer() {
           send(response, 422, { message: 'Enter a valid HTTPS WhatsApp link.' })
           return
         }
-        await updateStore((store) => { store.settings = { telegramUrl, whatsappUrl } })
+        await updateStore((store) => { store.settings = { ...store.settings, telegramUrl, whatsappUrl } })
         send(response, 200, { settings: { telegramUrl, whatsappUrl } })
         return
       }
@@ -531,6 +556,8 @@ export function createApiServer() {
           status: payload.status === 'draft' ? 'draft' : 'published',
           zoomMeetingId: '',
           joinUrl: normalise(payload.joinUrl, 500),
+          registrationUrl: normalise(payload.registrationUrl, 500),
+          ctaLabel: normalise(payload.ctaLabel, 60),
           createdAt: new Date().toISOString(),
         }
         const errors = {}
@@ -539,11 +566,12 @@ export function createApiServer() {
         if (!isTimeZone(webinar.timeZone)) errors.timeZone = 'Choose a valid time zone.'
         if (!Number.isInteger(webinar.durationMinutes) || webinar.durationMinutes < 15 || webinar.durationMinutes > 1440) errors.durationMinutes = 'Duration must be between 15 minutes and 24 hours.'
         if (webinar.joinUrl && !validHttpsUrl(webinar.joinUrl, ['*.zoom.us'])) errors.joinUrl = 'Use a valid HTTPS Zoom meeting URL or create one with Zoom.'
+        if (webinar.registrationUrl && !validHttpsUrl(webinar.registrationUrl)) errors.registrationUrl = 'Enter a valid HTTPS registration link.'
         if (Object.keys(errors).length) {
           send(response, 422, { message: 'Please correct the webinar details.', errors })
           return
         }
-        if (!webinar.joinUrl) {
+        if (!webinar.joinUrl && payload.createZoom === true) {
           try {
             const created = await zoomRequest('/users/me/meetings', {
               method: 'POST',
@@ -580,6 +608,11 @@ export function createApiServer() {
           const durationMinutes = Number(payload.durationMinutes || webinar.durationMinutes)
           const timeZone = normalise(payload.timeZone, 80) || webinar.timeZone
           const status = payload.status === 'draft' ? 'draft' : 'published'
+          const registrationUrl = normalise(payload.registrationUrl ?? webinar.registrationUrl, 500)
+          const ctaLabel = normalise(payload.ctaLabel ?? webinar.ctaLabel, 60)
+          const joinUrl = normalise(payload.joinUrl ?? webinar.joinUrl, 500)
+          if (registrationUrl && !validHttpsUrl(registrationUrl)) return { error: 'Enter a valid HTTPS registration link.' }
+          if (joinUrl && !validHttpsUrl(joinUrl, ['*.zoom.us'])) return { error: 'Enter a valid HTTPS Zoom link.' }
           const changedZoomFields = title !== webinar.title || startsAt !== webinar.startsAt || description !== webinar.description || durationMinutes !== webinar.durationMinutes || timeZone !== webinar.timeZone
           if (title.length < 3 || !isFutureDate(startsAt) || !isTimeZone(timeZone) || !Number.isInteger(durationMinutes) || durationMinutes < 15 || durationMinutes > 1440) return { error: 'Check the title, valid time zone, future date, and 15–1440 minute duration.' }
           if (webinar.zoomMeetingId && changedZoomFields) {
@@ -592,7 +625,7 @@ export function createApiServer() {
               return { error: error.message, status: error.status || 502 }
             }
           }
-          Object.assign(webinar, { title, description, startsAt, durationMinutes, timeZone, speaker: normalise(payload.speaker, 120), status })
+          Object.assign(webinar, { title, description, startsAt, durationMinutes, timeZone, speaker: normalise(payload.speaker, 120), status, joinUrl, registrationUrl, ctaLabel })
           return { webinar }
         })
         if (!found) {
@@ -630,7 +663,8 @@ export function createApiServer() {
     send(response, 404, { message: 'Route not found.' })
   } catch (error) {
     console.error('API request failed:', error.message)
-    send(response, 500, { message: error.message === 'Request body is too large.' || error.message === 'Request body must be valid JSON.' ? error.message : 'Unable to process this request. Please try again.' })
+    const invalidBody = error.message === 'Request body is too large.' || error.message === 'Request body must be valid JSON.'
+    send(response, invalidBody ? 400 : 500, { message: invalidBody ? error.message : 'Unable to process this request. Please try again.' })
   }
   })
 }

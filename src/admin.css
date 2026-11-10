@@ -98,3 +98,10 @@
 .spotlight-layout .admin-webinar-list { display: grid; gap: 11px; }
 .spotlight-layout .webinar-summary { padding: 17px; }
 @media (max-width: 800px) { .spotlight-layout { grid-template-columns: 1fr; } }
+.admin-editor-entry { min-width:0; padding:20px; border:1px solid #d4e0d1; border-radius:10px; margin:12px 0; }
+.admin-editor-entry legend { font-weight:700; padding:0 8px; }
+.admin-editor-entry summary { cursor:pointer; font-weight:700; padding:8px 0; }
+.admin-editor-fields, .admin-editor-entry fieldset { display:grid; gap:16px; }
+.admin-editor-entry label { margin-bottom:16px; }
+.admin-editor-entry .admin-form-actions { flex-wrap:wrap; }
+.admin-form button:disabled { opacity:.5; cursor:default; }

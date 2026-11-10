@@ -4,10 +4,35 @@ React and Vite public site with a private webinar management workspace and a sma
 
 ## Run locally
 
-1. Copy `.env.example` to `.env` and configure the admin credentials and session secret. Add provider credentials if Zoom, email, and WhatsApp delivery should be live.
-2. In one terminal, run `npm run api` (default API port `8787`).
-3. In another terminal, run `npm run dev` and open the URL Vite prints (default `http://localhost:5173`).
-4. Open `/admin` to sign in and create/publish webinars. The editor can create a Zoom meeting when Zoom credentials are configured, or accept an existing Zoom join URL.
+1. Run `npm run dev`, or double-click `Start-Mubsa.cmd` on Windows. Keep that terminal open.
+2. Open `http://127.0.0.1:8080/`. This one process serves both the website and `/api`; a separate API terminal is not needed.
+3. Open `http://127.0.0.1:8080/admin`. Without an `.env`, the localhost-only development runner prints a temporary admin email and a random session password in its terminal. These change on restart. Your records do not.
+4. For stable private credentials, copy `.env.example` to `.env` and configure `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `ADMIN_SESSION_SECRET`. Add provider credentials only when delivery should be live. Never use the example password in production.
+5. In **Seminars & webinars**, publish a title, future date/time, duration and optional speaker. Leave the registration URL blank to collect registrations on this website, or enter an HTTPS registration page. A Zoom meeting is optional; automatic Zoom creation is an explicit option.
+
+## Edit the website from admin
+
+- **Links & buttons:** save the Telegram and WhatsApp destinations; add, edit, reorder or remove social profiles; change the default registration and community button labels.
+- **Seminars & webinars:** create or edit the seminar date/time, description, speaker, publication status, registration destination and button label. Times are entered in the browser’s stated time zone and stored as an absolute timestamp. Future published events appear on the home/events pages, announcement strip and registration popup. Draft and past events stay hidden.
+- **FAQs:** edit questions, answers and categories; add, remove or reorder entries. Search and category filters update automatically.
+- **Contact:** edit the heading, description, location, email and phone. Contact pages and footer links use these values.
+- **Courses:** edit names, descriptions, introductions, learning focus, URL slugs, curriculum modules and topics. Add, reorder or remove courses (keep at least one). Enquiry choices and course announcement slides use the saved catalogue.
+- Select **Publish content** in the relevant section. Each section saves independently and keeps the other sections intact. Refresh the public page to see the result immediately, or allow its 30-second refresh to run.
+- Built-in seminar registrations appear in **Registrations**. Registrations submitted to an external link are managed by that service. Course enquiries appear under **Enquiries**.
+
+Content is validated on the server and persists in the existing local JSON store or configured D1 database. Existing installations automatically receive default values for the new fields; no database migration is required.
+
+`DEV_PORT` changes the combined server port. It binds to `127.0.0.1` by default. No scheduled task, startup entry, or firewall change is required. For separate frontend/API development use `npm run api` plus `npm run dev:frontend`.
+
+## Website and admin behavior
+
+- Home: mentor hero, introductory carousel, time/price study, Gann topic dialogs, course cards, paged study guide, event gallery with filters/lightbox, mentor section, testimonial carousel, FAQ search/categories, and contact form.
+- Welcome popup: appears once per browser tab session after its configurable delay; supports Escape, outside click, keyboard focus containment, and a footer control to reopen it.
+- Theme switch, mobile navigation, More menu, deep-linked course details, learning calculator, and policy routes.
+- Admin: webinars, registrations, announcements, community links, enquiry status, popup settings, YouTube insight link, approved gallery images, testimonials, and policy copy.
+- The local store remains in `server/data/records.json`. `npm test` checks the API with isolated temporary records and never writes test content into the live site.
+
+The reference's private code is unavailable, so this is an independent implementation of its observed interaction patterns. It retains Mubsa's course content and supplied portraits. Event photos, testimonials, exact policy wording, community URL, free video, and an actual webinar schedule must be supplied/published by the client. The study guide is original introductory material, not the reference's commercial book. There is no payment checkout or learner account system; Login opens the management dashboard.
 
 The API command loads `.env` into the Node process. Vite does not expose those values to browser code. Never put Zoom, email, WhatsApp, admin password, or session-secret values in `VITE_*` variables.
 
@@ -47,6 +72,6 @@ To publish, sign into Cloudflare, create the D1 database with `npm run db:create
 
 ## Content notes
 
-The instructor card is marked as a sample and uses a temporary workshop image. Replace it with the instructor's approved portrait, biography, qualifications, and name. Testimonial quotes are kept intact; the client has not supplied a verified mapping between each quote and the participant names/occupations, so the page labels those details as “Course participant / Profession not provided” instead of attributing a quote to the wrong person. Replace those labels once the client confirms pairings.
+The supplied client portraits are optimized in `public/client-founder.jpg` and `public/client-portrait.jpg`. No reference-site testimonials, performance figures, event photographs, or identities are attributed to Mubsa. Gallery and testimonial controls become populated when approved entries are published from admin. Policy pages show contact guidance until approved wording is published.
 
 All market course content is educational and does not promise returns. Contact details and provider configuration should be verified by the institute before public launch.
