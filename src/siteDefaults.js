@@ -1,7 +1,7 @@
 import { courses } from './courseData.js'
 export const defaultContent = {
-  popupEnabled: true, popupDelay: 4, popupTitle: 'Your market learning journey starts here.',
-  popupText: 'Meet Mubarak Ahmad and explore a structured approach to charts, time cycles, and risk. Join an upcoming webinar or speak with our team.',
+  popupEnabled: true, popupDelay: 4, popupTitle: 'Join our next live webinar.',
+  popupText: 'Learn with Mubsa Fin Institute. Enter your details below for our upcoming webinar and session announcements.',
   videoUrl: '', gallery: [
     { title: 'Mubarak Ahmad — founder portrait', city: 'Founder', image: '/client-founder.jpg' },
     { title: 'Mubarak Ahmad — mentor portrait', city: 'Mentor', image: '/client-portrait.jpg' },

@@ -26,6 +26,10 @@ Content is validated on the server and persists in the existing local JSON store
 
 ## Website and admin behavior
 
+The supplied `Mubsafin_Website_Content.docx` provides the hero, learning-process, course-principles and footer copy. `Website changes.docx` supplies the webinar-first popup, scrolling webinar/Telegram strip, whole-card course links, combined testimonials and horizontal footer requirements. The inventory's historical “Not Found” notes are not current site copy; working routes remain available.
+
+The welcome popup displays name, email, phone, city and profession directly. Published webinars save registrations; when no webinar is published, the form saves a webinar-interest enquiry (including city/profession) for admin follow-up. The configured WhatsApp link overrides the contact phone's WhatsApp destination. An optional external registration link remains available alongside the built-in form. Announcement motion can be paused and respects reduced-motion preferences.
+
 - Home: mentor hero, introductory carousel, time/price study, Gann topic dialogs, course cards, paged study guide, event gallery with filters/lightbox, mentor section, testimonial carousel, FAQ search/categories, and contact form.
 - Welcome popup: appears once per browser tab session after its configurable delay; supports Escape, outside click, keyboard focus containment, and a footer control to reopen it.
 - Theme switch, mobile navigation, More menu, deep-linked course details, learning calculator, and policy routes.

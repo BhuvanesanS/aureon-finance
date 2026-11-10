@@ -388,6 +388,8 @@ export function createApiServer() {
         email: normalise(payload.email, 254).toLowerCase(),
         phone: normalise(payload.phone, 30),
         city: normalise(payload.city, 100),
+        profession: normalise(payload.profession, 100),
+        kind: payload.kind === 'webinar-interest' ? 'webinar-interest' : 'course-enquiry',
         course: normalise(payload.course, 100),
         preferredDate: normalise(payload.preferredDate, 30),
         preferredTime: normalise(payload.preferredTime, 30),
@@ -397,6 +399,10 @@ export function createApiServer() {
         createdAt: new Date().toISOString(),
       }
       const errors = {}
+      if (booking.kind === 'webinar-interest') {
+        if (!registrationCities.has(booking.city)) errors.city = 'Choose a city from the list.'
+        if (!registrationProfessions.has(booking.profession)) errors.profession = 'Choose a profession from the list.'
+      }
       if (booking.fullName.length < 2) errors.fullName = 'Enter your full name.'
       if (!emailIsValid(booking.email)) errors.email = 'Enter a valid email address.'
       if (booking.phone.replace(/\D/g, '').length < 7) errors.phone = 'Enter a valid phone number.'
