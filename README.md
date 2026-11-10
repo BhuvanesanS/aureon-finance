@@ -15,6 +15,7 @@ React and Vite public site with a private webinar management workspace and a sma
 - **Links & buttons:** save the Telegram and WhatsApp destinations; add, edit, reorder or remove social profiles; change the default registration and community button labels.
 - **Seminars & webinars:** create or edit the seminar date/time, description, speaker, publication status, registration destination and button label. Times are entered in the browser’s stated time zone and stored as an absolute timestamp. Future published events appear on the home/events pages, announcement strip and registration popup. Draft and past events stay hidden.
 - **FAQs:** edit questions, answers and categories; add, remove or reorder entries. Search and category filters update automatically.
+- **Website & popups:** edit learner names, roles, approved feedback and optional 1–5 class-clarity ratings. Ratings without a written comment are displayed as ratings, not invented quotations.
 - **Contact:** edit the heading, description, location, email and phone. Contact pages and footer links use these values.
 - **Courses:** edit names, descriptions, introductions, learning focus, URL slugs, curriculum modules and topics. Add, reorder or remove courses (keep at least one). Enquiry choices and course announcement slides use the saved catalogue.
 - Select **Publish content** in the relevant section. Each section saves independently and keeps the other sections intact. Refresh the public page to see the result immediately, or allow its 30-second refresh to run.

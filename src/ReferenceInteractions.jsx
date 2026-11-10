@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { FaWhatsapp, FaTelegram, FaInstagram, FaFacebookF, FaYoutube, FaLinkedinIn, FaXTwitter, FaLink, FaXmark, FaArrowUp, FaPaperPlane, FaClock, FaBorderAll, FaCompassDrafting, FaBullseye, FaCircleNotch } from 'react-icons/fa6'
+import { FaWhatsapp, FaTelegram, FaInstagram, FaFacebookF, FaYoutube, FaLinkedinIn, FaXTwitter, FaLink, FaXmark, FaArrowUp, FaPaperPlane, FaClock, FaBorderAll, FaCompassDrafting, FaBullseye, FaCircleNotch, FaQuoteLeft, FaStar } from 'react-icons/fa6'
 
 const networks = { instagram: FaInstagram, facebook: FaFacebookF, youtube: FaYoutube, linkedin: FaLinkedinIn, telegram: FaTelegram, x: FaXTwitter, twitter: FaXTwitter }
 export function SocialDock({ links, telegramUrl }) {
@@ -55,7 +55,7 @@ export function FeedbackCards({ items }) {
   if (!items.length) return <p className="m-empty">Learner stories will be published with permission. No trading results are guaranteed.</p>
   const rows = items.length > 3 ? [items.filter((_,i)=>i%2===0),items.filter((_,i)=>i%2===1)] : [items]
   return <div className={`m-feedback-stream ${paused ? 'paused' : ''}`}>
-    {rows.map((row,index) => <div className={`m-feedback-window ${row.length < 2 ? 'static' : ''}`} key={index}><div className="m-feedback-track">{[0,1].map(copy => <div className="m-feedback-group" key={copy} aria-hidden={copy === 1 ? true : undefined}>{row.map((item,i)=><article className="m-feedback-card" key={i}><blockquote>“{item.quote}”</blockquote><div><span className="m-avatar" aria-hidden="true">{item.name.slice(0,1)}</span><p><strong>{item.name}</strong>{item.role && <small>{item.role}</small>}</p></div></article>)}</div>)}</div></div>)}
+    {rows.map((row,index) => <div className={`m-feedback-window ${row.length < 2 ? 'static' : ''}`} key={index}><div className="m-feedback-track">{[0,1].map(copy => <div className="m-feedback-group" key={copy} aria-hidden={copy === 1 ? true : undefined}>{row.map((item,i)=><article className="m-feedback-card" key={i}><FaQuoteLeft className="m-feedback-quote-icon" aria-hidden="true" />{item.rating > 0 && <div className="m-feedback-rating" aria-label={`${item.rating} out of 5 for class clarity`}><span aria-hidden="true">{Array.from({length:5},(_,star)=><FaStar key={star} className={star < Number(item.rating) ? 'filled' : ''} />)}</span><small>Class clarity · {item.rating}/5</small></div>}{item.quote ? <blockquote>“{item.quote}”</blockquote> : <p className="m-feedback-rating-only">Rated the class easy to understand.</p>}<div className="m-feedback-person"><span className="m-avatar" aria-hidden="true">{item.name.replace(/^(Mr|Mrs|Miss|Ms)\.?\s+/i,'').split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()}</span><p><strong>{item.name}</strong>{item.role && <small>{item.role}</small>}</p></div></article>)}</div>)}</div></div>)}
     {items.length > 1 && <button className="m-text" onClick={()=>setPaused(!paused)}>{paused ? 'Play' : 'Pause'} learner stories</button>}
   </div>
 }

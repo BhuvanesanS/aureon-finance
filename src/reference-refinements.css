@@ -83,6 +83,11 @@
 .m-feedback-stream { text-align:center; }.m-feedback-window { overflow:hidden; margin:20px 0; }.m-feedback-track { display:flex; width:max-content; animation:m-feedback-scroll 55s linear infinite; }.m-feedback-window:nth-child(2) .m-feedback-track { animation-direction:reverse; }.m-feedback-group { display:flex; flex-shrink:0; gap:20px; padding-right:20px; }
 .m-feedback-card { width:340px; padding:28px; background:var(--m-soft); border:1px solid var(--m-line); border-radius:16px; text-align:left; }.m-feedback-card blockquote { margin:0 0 24px; font-size:14px; line-height:1.8; }.m-feedback-card>div { display:flex; align-items:center; gap:12px; border-top:1px solid var(--m-line); padding-top:18px; }.m-feedback-card p { margin:0; font-size:13px; }.m-feedback-card small { display:block; color:var(--m-muted); font-size:11px; margin-top:3px; }.m-avatar { width:36px; height:36px; display:grid; place-items:center; border-radius:50%; background:var(--m-gold); color:var(--m-bg); font-weight:700; }
 .m-feedback-stream.paused .m-feedback-track,.m-feedback-stream:hover .m-feedback-track,.m-feedback-stream:focus-within .m-feedback-track { animation-play-state:paused; }.m-feedback-window.static .m-feedback-track { animation:none; width:100%; justify-content:center; }.m-feedback-window.static [aria-hidden=true] { display:none; }
+.m-feedback-card { display:flex; flex-direction:column; min-height:310px; }
+.m-feedback-quote-icon { color:var(--m-gold); opacity:.6; font-size:25px; margin-bottom:12px; }
+.m-feedback-card>.m-feedback-rating { border:0; padding:0; display:block; margin-bottom:14px; }
+.m-feedback-rating>span { display:flex; gap:3px; color:var(--m-line); font-size:15px; }.m-feedback-rating .filled { color:var(--m-gold); }.m-feedback-rating small { margin-top:5px; }
+.m-feedback-card blockquote { flex:1; white-space:pre-line; }.m-feedback-card>.m-feedback-rating-only { flex:1; color:var(--m-muted); font-size:14px; margin:0 0 24px; }.m-feedback-card>.m-feedback-person { margin-top:auto; }
 @keyframes m-feedback-scroll { to { transform:translateX(-50%); } }
 @keyframes m-dialog-in { from { opacity:0; transform:translateY(18px) scale(.98); } to { opacity:1; transform:none; } }
 @keyframes m-book-turn { from { opacity:.4; transform:perspective(800px) rotateY(-12deg); } to { opacity:1; transform:none; } }

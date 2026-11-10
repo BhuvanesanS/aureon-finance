@@ -16,7 +16,11 @@ export function validateContent(input) {
         if (!https(image) && !/^\/(?!\/)[\w/.-]+\.(jpg|jpeg|png|webp)$/i.test(image)) throw new Error('Gallery images must use an HTTPS URL or a local image path.')
         return { title: text(entry.title, 150), city: text(entry.city, 80), image }
       }
-      if (key === 'testimonials') return { name: text(entry.name, 120), role: text(entry.role, 120), quote: text(entry.quote, 2000) }
+      if (key === 'testimonials') {
+        const rating = entry.rating === '' || entry.rating == null ? null : Number(entry.rating)
+        if (rating !== null && (!Number.isInteger(rating) || rating < 1 || rating > 5)) throw new Error('Choose a class clarity rating from 1 to 5.')
+        return { name: required(entry.name, 120, 'a learner name'), role: text(entry.role, 120), quote: text(entry.quote, 2000), rating }
+      }
       return { slug: text(entry.slug, 80).replace(/[^a-z-]/g, ''), title: text(entry.title, 160), body: text(entry.body, 12000) }
     })
   }

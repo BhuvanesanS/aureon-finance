@@ -1,0 +1,9 @@
+// Client-provided feedback. The 5/5 score refers to whether the class was easy to understand.
+export const testimonialDefaults = [
+  { name:'Mr Samsul Abideen', role:'MEP Senior Engineer', rating:5, quote:'Class was very useful. Not even feel like bored. Will continue travel together.' },
+  { name:'Miss Sabreen', role:'College Student', rating:5, quote:"First of all ennala trading learn panika mudium ah nu oru doubt oda join senjan but ipo class mudinjiduchey nu romba varutham a iruku. You genuinely taught as a lot of things and you shared many of your experience with us and gave us lots of motivation and advices. The way you talking class is 100/100. You never failed to clear our doubts. You are more than a instructor nana. Inshallah I'm willing to join all your upcoming advance classes." },
+  { name:'Mrs Zainab Fathima', role:'Home Maker', rating:5, quote:'' },
+  { name:'Miss Rizvia', role:'School Teacher', rating:5, quote:'' },
+  { name:'Mr Habeeb', role:'HR Manager', rating:5, quote:'Before attending this course, I had zero knowledge about trading and no confidence in understanding the market. After attending the classes, I can confidently say that I have learned a lot and benefited greatly from the training. This course has been a real confidence booster for me. The trainer was always available whenever we had doubts, and the continuous support and guidance provided helped increase my confidence to enter the trading world. The teaching style was clear, beginner-friendly, and very motivating. Overall, it was a very valuable learning experience.' },
+  { name:'Mr Mohammed Ali', role:'Security System Engineer', rating:5, quote:'It very good start for us to learn, before we thought this market and intraday trade cannot do, you changed this myth, can understand chart, structure, patterns and strategies, need some time to pickup but this time have hope, and instructor is good in knowledge and very nice in personal life. Thanks.' },
+]

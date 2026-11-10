@@ -35,8 +35,10 @@ test('public forms, admin, publication and persistence work together', async () 
     config.communityLabel='Join Telegram'
     config.courses[0]={...config.courses[0],name:'Foundations Course',description:'Updated course description',modules:[['Updated module','Updated syllabus',['First topic','Second topic']]]}
     config.gallery=[{title:'Approved portrait',city:'Dubai',image:'/client-portrait.jpg'}]
-    config.testimonials=[{name:'Test learner',role:'Test only',quote:'A test quote, not production content.'}]
+    config.testimonials=[{name:'Test learner',role:'Test only',quote:'',rating:5}]
     assert.equal((await call('/api/admin/content','PUT',config,true)).status,200)
+    assert.equal((await call('/api/site-content')).data.content.testimonials[0].rating,5)
+    assert.equal((await call('/api/admin/content','PUT',{testimonials:[{name:'Test',rating:6}]},true)).status,422)
     assert.equal((await call('/api/admin/content','PUT',{...config,gallery:[{image:'javascript:alert(1)'}]},true)).status,422)
     assert.equal((await call('/api/admin/settings','PATCH',{telegramUrl:'https://t.me/example',whatsappUrl:''},true)).status,200)
     const publicContent=(await call('/api/site-content')).data

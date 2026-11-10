@@ -1,11 +1,12 @@
 import { courses } from './courseData.js'
+import { testimonialDefaults } from './testimonialDefaults.js'
 export const defaultContent = {
   popupEnabled: true, popupDelay: 4, popupTitle: 'Join our next live webinar.',
   popupText: 'Learn with Mubsa Fin Institute. Enter your details below for our upcoming webinar and session announcements.',
   videoUrl: '', gallery: [
     { title: 'Mubarak Ahmad — founder portrait', city: 'Founder', image: '/client-founder.jpg' },
     { title: 'Mubarak Ahmad — mentor portrait', city: 'Mentor', image: '/client-portrait.jpg' },
-  ], testimonials: [], policies: [],
+  ], testimonials: testimonialDefaults, policies: [],
   contact: { title: 'Let’s start a conversation.', description: 'Tell us where you are in your learning journey.', location: 'Dubai · India', phone: '+91 9983 67 9983', email: 'askme@mubsacapital.com' },
   registrationLabel: 'Register here', communityLabel: 'Join free community',
   socialLinks: [],
