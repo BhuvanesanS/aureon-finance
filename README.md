@@ -30,9 +30,11 @@ The supplied `Mubsafin_Website_Content.docx` provides the hero, learning-process
 
 The welcome popup displays name, email, phone, city and profession directly. Published webinars save registrations; when no webinar is published, the form saves a webinar-interest enquiry (including city/profession) for admin follow-up. The configured WhatsApp link overrides the contact phone's WhatsApp destination. An optional external registration link remains available alongside the built-in form. Announcement motion can be paused and respects reduced-motion preferences.
 
-- Home: mentor hero, introductory carousel, time/price study, Gann topic dialogs, course cards, paged study guide, event gallery with filters/lightbox, mentor section, testimonial carousel, FAQ search/categories, and contact form.
+- Home: mentor hero, introductory carousel, time/price study, Gann image tiles and topic dialogs, course cards, animated study guide, event gallery with filters/lightbox, mentor section, scrolling learner stories, FAQ search/categories, and contact form.
 - Welcome popup: appears once per browser tab session after its configurable delay; supports Escape, outside click, keyboard focus containment, and a footer control to reopen it.
 - Theme switch, mobile navigation, More menu, deep-linked course details, learning calculator, and policy routes.
+- Poppins fonts are served locally. Reference-style floating navigation, responsive hero actions, entry animations, FAQ cards and image hover states use the approved green palette. Motion respects reduced-motion settings; learner stories and announcements can be paused.
+- The WhatsApp button opens a message panel. Continue on WhatsApp passes the draft to the admin-configured WhatsApp URL; it does not claim that an operator is online or silently send a message. Social links populate the desktop social dock and footer from the admin settings.
 - Admin: webinars, registrations, announcements, community links, enquiry status, popup settings, YouTube insight link, approved gallery images, testimonials, and policy copy.
 - The local store remains in `server/data/records.json`. `npm test` checks the API with isolated temporary records and never writes test content into the live site.
 
