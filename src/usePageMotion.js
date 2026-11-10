@@ -18,7 +18,7 @@ export function usePageMotion(path) {
         animation.onfinish = () => animations.delete(animation)
       }
     }, { threshold: .08 })
-    document.querySelectorAll('.m-heading,.m-intro>div,.m-course-link,.m-topic-tile,.m-team>div,.m-gallery>button').forEach(el => observer.observe(el))
+    document.querySelectorAll('.m-heading,.m-intro>div,.m-course-link,.m-topic-tile,.m-team>div,.m-gallery>button,.m-principles>div,.m-focus-row,.m-book-section>div,.m-community,.m-faq details,.m-contact>div,.m-contact>.m-form,.m-modules details').forEach(el => observer.observe(el))
     const cancel = () => { if (reduced.matches) { observer.disconnect(); animations.forEach(a => a.cancel()) } }
     reduced.addEventListener('change', cancel)
     return () => { observer.disconnect(); animations.forEach(a => a.cancel()); reduced.removeEventListener('change', cancel) }

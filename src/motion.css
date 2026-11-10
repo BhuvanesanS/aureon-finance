@@ -1,0 +1,33 @@
+/* Short, non-blocking motion: navigation and forms stay usable throughout. */
+@keyframes mubsa-page-in { from { opacity:.72; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes mubsa-hero-copy { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+@keyframes mubsa-hero-photo { from { opacity:0; transform:translateX(18px); } to { opacity:1; transform:translateX(0); } }
+@keyframes mubsa-menu-in { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes mubsa-label-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.m-page-transition { animation:mubsa-page-in .38s cubic-bezier(.2,.75,.25,1); }
+.m-hero-copy { animation:mubsa-hero-copy .7s .08s both cubic-bezier(.2,.75,.25,1); }
+.m-hero-image { animation:mubsa-hero-photo .8s .16s both cubic-bezier(.2,.75,.25,1); }
+.m-mentor-label { animation:mubsa-label-in .6s .45s both ease-out; }
+.m-more>div,.m-header nav.open { animation:mubsa-menu-in .2s ease-out; }
+.mubsa-site .m-btn,.m-dialog .m-btn { transition:transform .22s ease,background-color .22s ease,border-color .22s ease,box-shadow .22s ease; }
+.mubsa-site .m-btn:hover,.m-dialog .m-btn:hover { box-shadow:0 9px 22px #0003; }
+.mubsa-site .m-btn:active,.m-dialog .m-btn:active { transform:translateY(1px) scale(.98); }
+.m-btn svg,.m-text svg { transition:transform .22s ease; }
+.m-btn:hover svg,.m-text:hover svg { transform:translateX(4px); }
+.m-header nav a,.m-header-actions>a,.m-footer a,.m-icon,.m-controls button,.m-chips button { transition:background-color .22s,color .22s,border-color .22s,transform .22s; }
+.m-icon:hover,.m-controls button:hover { border-color:var(--m-gold); color:var(--m-gold); transform:rotate(8deg); }
+.m-chips button:hover { transform:translateY(-2px); border-color:var(--m-gold); }
+.m-gallery button img { transition:transform .55s ease,filter .55s ease; }
+.m-gallery button:hover img { transform:scale(1.06); }
+.m-team-image img { transition:transform .6s ease; }
+.m-team-image:hover img { transform:scale(1.035); }
+.m-form input,.m-form select,.m-form textarea,.m-search input { transition:border-color .2s,box-shadow .2s; }
+.m-form input:focus,.m-form select:focus,.m-form textarea:focus,.m-search input:focus { border-color:var(--m-gold); box-shadow:0 0 0 3px color-mix(in srgb,var(--m-gold) 20%,transparent); }
+.m-faq details,.m-modules details { transition:border-color .25s,background-color .25s; }
+.m-faq summary::after { transition:transform .25s,background-color .25s; }
+.m-faq details[open] summary::after { transform:rotate(180deg); }
+.m-offline,.m-success { animation:mubsa-label-in .35s ease-out; }
+@media(prefers-reduced-motion:reduce) {
+  .m-page-transition,.m-hero-copy,.m-hero-image,.m-mentor-label,.m-more>div,.m-header nav.open,.m-offline,.m-success { animation:none!important; }
+  .mubsa-site *,.m-dialog * { transition:none!important; }
+}
