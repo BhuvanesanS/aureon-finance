@@ -20,7 +20,8 @@ import AdminDashboard from './AdminDashboard'
 import { defaultContent as defaults } from './siteDefaults'
 import './experience.css'
 import { AnnouncementTicker, WebinarPanel } from './WebinarExperience'
-import { SocialDock, BackToTop, FeedbackCards } from './ReferenceInteractions'
+import { SocialDock, BackToTop } from './ReferenceInteractions'
+import TestimonialsShowcase from './TestimonialsShowcase'
 import './reference-refinements.css'
 import './motion.css'
 import WebinarLanding from './WebinarLanding'
@@ -964,6 +965,16 @@ export default function MubsaExperience() {
                 </div>
               </section>
 
+              {/* Voices of Mubsa Family (Testimonials) */}
+              <section className="m-section" id="testimonials">
+                <Heading
+                  eyebrow="Voices of Mubsa Family"
+                  title="People from different paths, learning with purpose."
+                  text="“Real experiences from our aspiring traders who are developing their market knowledge through practical education.”"
+                />
+                <TestimonialsShowcase items={content.testimonials} go={go} />
+              </section>
+
               {/* Community Banner */}
               <section className="m-community">
                 <FaTelegram />
@@ -1212,14 +1223,16 @@ export default function MubsaExperience() {
 
           {/* TESTIMONIALS PAGE */}
           {path === '/testimonials' && (
-            <section className="m-section m-tone" id="testimonials">
-              <Heading
-                eyebrow="Voices of Mubsa Family"
-                title="People from different paths, learning with purpose."
-                text="“Real experiences from our aspiring traders who are developing their market knowledge through practical education.”"
-              />
-              <FeedbackCards items={content.testimonials} />
-            </section>
+            <div className="m-page">
+              <section className="m-section m-tone" id="testimonials">
+                <Heading
+                  eyebrow="Voices of Mubsa Family"
+                  title="People from different paths, learning with purpose."
+                  text="“Real experiences from our aspiring traders who are developing their market knowledge through practical education.”"
+                />
+                <TestimonialsShowcase items={content.testimonials} go={go} />
+              </section>
+            </div>
           )}
 
           {/* FAQ PAGE */}
