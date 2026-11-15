@@ -9,7 +9,15 @@ const staticDirectory = resolve('dist')
 let runtimeEnv = process.env
 const cookieName = 'mfi_admin_session'
 const sessionTtlSeconds = 8 * 60 * 60
-const registrationCities = new Set(['Chennai', 'Coimbatore', 'Madurai', 'Bengaluru', 'Hyderabad', 'Mumbai', 'Delhi', 'Dubai', 'Other'])
+const registrationCities = new Set([
+  'Chennai', 'Coimbatore', 'Madurai', 'Bengaluru', 'Hyderabad', 'Mumbai', 'Delhi', 'Dubai', 'UAE', 'Other',
+  'Andaman and Nicobar Islands', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chandigarh',
+  'Chhattisgarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Goa', 'Gujarat', 'Haryana',
+  'Himachal Pradesh', 'Jammu and Kashmir', 'Jharkhand', 'Karnataka', 'Kerala', 'Ladakh', 'Lakshadweep',
+  'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Puducherry',
+  'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand',
+  'West Bengal'
+])
 const registrationProfessions = new Set(['Student', 'Business owner', 'Salaried professional', 'Finance professional', 'Homemaker', 'Educator', 'Other'])
 const requestCounts = new Map()
 let writeQueue = Promise.resolve()
@@ -336,7 +344,7 @@ export function createApiServer() {
         name: normalise(payload.name, 120),
         email: normalise(payload.email, 254).toLowerCase(),
         phone: normalise(payload.phone, 30),
-        city: normalise(payload.city, 100),
+        city: normalise(payload.state || payload.city, 100),
         profession: normalise(payload.profession, 100),
         consent: payload.consent === true,
         createdAt: new Date().toISOString(),
@@ -387,7 +395,7 @@ export function createApiServer() {
         fullName: normalise(payload.fullName, 120),
         email: normalise(payload.email, 254).toLowerCase(),
         phone: normalise(payload.phone, 30),
-        city: normalise(payload.city, 100),
+        city: normalise(payload.state || payload.city, 100),
         profession: normalise(payload.profession, 100),
         kind: payload.kind === 'webinar-interest' ? 'webinar-interest' : 'course-enquiry',
         course: normalise(payload.course, 100),
@@ -407,7 +415,11 @@ export function createApiServer() {
       if (!emailIsValid(booking.email)) errors.email = 'Enter a valid email address.'
       if (booking.phone.replace(/\D/g, '').length < 7) errors.phone = 'Enter a valid phone number.'
       const bookingStore = await readStore()
-      if (!(bookingStore.settings.content?.courses || defaultContent.courses).some(course => course.name === booking.course)) errors.course = 'Choose one of the available courses.'
+      const allowedCourses = new Set([
+        ...(bookingStore.settings.content?.courses || defaultContent.courses).map(course => course.name),
+        'Basic Course', 'Intermediate Course', 'Advanced Course', 'Other', 'Not Sure – Need Course Guidance'
+      ])
+      if (!allowedCourses.has(booking.course)) errors.course = 'Choose one of the available courses.'
       if (!booking.consent) errors.consent = 'Consent is required before submitting a request.'
       if (Object.keys(errors).length) {
         send(response, 422, { message: 'Please correct the highlighted information.', errors })
