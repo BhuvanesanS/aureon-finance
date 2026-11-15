@@ -769,7 +769,7 @@ export default function MubsaExperience() {
                 {navLink('Contact', '/contact')}
                 <div className="m-mobile-links">
                   <button className="m-btn small" onClick={openTelegram}>
-                    MUBSA’S MAGIC <FaArrowRight />
+                    MUBSA MAGIC <FaArrowRight />
                   </button>
                 </div>
               </nav>
@@ -783,7 +783,7 @@ export default function MubsaExperience() {
                   {theme === 'dark' ? <FaSun /> : <FaMoon />}
                 </button>
                 <button className="m-btn small" onClick={openTelegram}>
-                  MUBSA’S MAGIC <FaArrowRight />
+                  MUBSA MAGIC <FaArrowRight />
                 </button>
               </div>
             </header>
