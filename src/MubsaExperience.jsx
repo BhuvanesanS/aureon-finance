@@ -1360,14 +1360,15 @@ export default function MubsaExperience() {
             wide={['welcome', 'webinar', 'guidance'].includes(modal.type)}
           >
             {['welcome', 'webinar'].includes(modal.type) && (
-              <div className={modal.type === 'welcome' ? 'm-webinar-welcome' : ''}>
-                {modal.type === 'welcome' && (
-                  <div className="m-webinar-mentor">
-                    <img src={founder} alt="Mubarak Ahmad" />
+              <div className="m-webinar-welcome">
+                <div className="m-webinar-mentor">
+                  <img src={founder} alt="Mubarak Ahmad, Founder & Academic Director" />
+                  <div className="m-mentor-label">
+                    <small>YOUR MENTOR</small>
                     <strong>Mubarak Ahmad</strong>
-                    <p>Founder & Academic Director<br />Mubsa Fin Institute</p>
+                    <span>Founder & Academic Director</span>
                   </div>
-                )}
+                </div>
                 <div>
                   <WebinarPanel webinar={modal.webinar || webinar} content={content} whatsappUrl={whatsappUrl}>
                     <WebinarRegistrationForm webinar={modal.webinar || webinar} onSuccess={close} />
