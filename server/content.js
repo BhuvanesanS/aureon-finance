@@ -26,6 +26,7 @@ export function validateContent(input) {
   }
   const contact = input.contact ?? defaultContent.contact
   result.contact = Object.fromEntries(Object.entries({ title:180, description:1000, location:300, phone:30, email:254 }).map(([key,max]) => [key,required(contact?.[key],max,`contact ${key}`)]))
+  if (contact?.website != null) result.contact.website = text(contact.website, 120)
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(result.contact.email)) throw new Error('Enter a valid contact email.')
   if (!/^\+?[\d\s().-]{7,30}$/.test(result.contact.phone) || result.contact.phone.replace(/\D/g,'').length < 7) throw new Error('Enter a valid contact phone number.')
   result.registrationLabel = required(input.registrationLabel ?? defaultContent.registrationLabel, 60, 'a registration button label')
@@ -42,7 +43,7 @@ export function validateContent(input) {
     const slug = required(entry.slug,80,'a course slug')
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error('Course slugs can contain lowercase letters, numbers, and single hyphens.')
     const course = { slug, number:String(i+1).padStart(2,'0') }
-    for (const [key,max] of Object.entries({name:100,tagline:200,description:2000,intro:8000,focusTitle:200,focus:4000})) course[key] = key === 'name' || key === 'description' ? required(entry[key],max,`course ${key}`) : text(entry[key],max)
+    for (const [key,max] of Object.entries({name:100,tagline:200,ctaLabel:120,description:2000,intro:8000,focusTitle:200,focus:4000})) course[key] = key === 'name' || key === 'description' ? required(entry[key],max,`course ${key}`) : text(entry[key],max)
     course.modules = list(entry.modules,40,'course modules').map(module => {
       if (!Array.isArray(module) || !Array.isArray(module[2]) || module[2].length > 60) throw new Error('Each module needs a title, description and up to 60 topics.')
       return [required(module[0],200,'a module title'),text(module[1],4000),module[2].map(topic => required(topic,500,'a module topic'))]

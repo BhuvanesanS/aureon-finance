@@ -248,6 +248,8 @@ function WebinarRegistrationForm({ webinar, onSuccess }) {
 }
 
 function CourseGuidanceForm({ initialCourse = '', onSuccess }) {
+  const { content } = useContext(SiteContext) || {}
+  const coursesList = content?.courses || []
   const [status, setStatus] = useState({})
   async function submit(e) {
     e.preventDefault()
@@ -259,7 +261,7 @@ function CourseGuidanceForm({ initialCourse = '', onSuccess }) {
         fullName: values.fullName,
         email: values.email,
         phone: values.phone,
-        course: values.course || 'Basic Course',
+        course: values.course || (coursesList[0]?.name || 'Basic Course'),
         message: messageBody,
         consent: true
       }
@@ -337,10 +339,10 @@ function CourseGuidanceForm({ initialCourse = '', onSuccess }) {
 
           <label>
             5. Course of Interest
-            <select name="course" defaultValue={initialCourse || 'Basic Course'} required>
-              <option value="Basic Course">Basic Course</option>
-              <option value="Intermediate Course">Intermediate Course</option>
-              <option value="Advanced Course">Advanced Course</option>
+            <select name="course" defaultValue={initialCourse || (coursesList[0]?.name || 'Basic Course')} required>
+              {coursesList.map(c => (
+                <option key={c.slug || c.name} value={c.name}>{c.name}</option>
+              ))}
               <option value="Not Sure – Need Course Guidance">Not Sure – Need Course Guidance</option>
             </select>
             {error('course')}
@@ -386,6 +388,8 @@ function CourseGuidanceForm({ initialCourse = '', onSuccess }) {
 }
 
 function ContactForm() {
+  const { content } = useContext(SiteContext) || {}
+  const coursesList = content?.courses || []
   const [status, setStatus] = useState({})
   async function submit(e) {
     e.preventDefault()
@@ -396,7 +400,7 @@ function ContactForm() {
         fullName: values.fullName,
         email: values.email,
         phone: values.phone,
-        course: values.course || 'Basic Course',
+        course: values.course || (coursesList[0]?.name || 'Basic Course'),
         message: values.message || '',
         consent: true
       }
@@ -452,10 +456,11 @@ function ContactForm() {
       </label>
       <label>
         Course of interest
-        <select name="course" defaultValue="Basic Course">
-          <option value="Basic Course">Basic Course</option>
-          <option value="Intermediate Course">Intermediate Course</option>
-          <option value="Advanced Course">Advanced Course</option>
+        <select name="course" defaultValue={coursesList[0]?.name || 'Basic Course'}>
+          {coursesList.map(c => (
+            <option key={c.slug || c.name} value={c.name}>{c.name}</option>
+          ))}
+          <option value="Not Sure – Need Course Guidance">Not Sure – Need Course Guidance</option>
           <option value="Other">Other</option>
         </select>
         {error('course')}
@@ -504,20 +509,22 @@ function FAQ({ full = false }) {
 
 function Contact() {
   const { content, whatsappUrl } = useContext(SiteContext)
-  const { location, email, phone } = content.contact
+  const { location, email, phone, website, title, description } = content.contact
+  const siteUrl = website?.startsWith('http') ? website : `https://${website || 'mubsafin.com'}`
+  const displayWebsite = website || 'mubsafin.com'
   return (
     <section className="m-section m-contact" id="contact">
       <div>
         <p className="m-kicker">Connect with us</p>
-        <h2>Have a question about the courses or other queries?</h2>
-        <p>Contact Mubsa Fin Institute</p>
+        <h2>{title || 'Have a question about the courses or other queries?'}</h2>
+        <p>{description || 'Contact Mubsa Fin Institute'}</p>
         <dl>
           <dt>BASED IN</dt>
           <dd>{location}</dd>
           <dt>EMAIL US</dt>
           <dd><a href={`mailto:${email}`}>{email}</a></dd>
           <dt>WEBSITE</dt>
-          <dd><a href="https://mubsafin.com" target="_blank" rel="noreferrer">mubsafin.com</a></dd>
+          <dd><a href={siteUrl} target="_blank" rel="noreferrer">{displayWebsite}</a></dd>
           <dt>CALL US</dt>
           <dd><a href={`tel:${phone.replace(/[^+0-9]/g, '')}`}>{phone}</a></dd>
         </dl>
@@ -800,6 +807,7 @@ export default function MubsaExperience() {
               community={openTelegram}
               register={() => go('/webinar')}
               slides={data.slides || []}
+              content={content}
             />
           </>
         )}
@@ -835,7 +843,7 @@ export default function MubsaExperience() {
                       Explore Courses <FaArrowRight />
                     </button>
                     <button className="m-btn secondary" onClick={openTelegram}>
-                      <FaTelegram /> The 5% Club
+                      <FaTelegram /> {content.communityLabel || 'The 5% Club'}
                     </button>
                   </div>
                 </div>
@@ -1236,7 +1244,7 @@ export default function MubsaExperience() {
           )}
 
           {/* FAQ PAGE */}
-          {path === '/faq' && <FAQ full={true} />}
+          {(path === '/faq' || path === '/faqs') && <FAQ full={true} />}
 
           {/* CONTACT PAGE */}
           {path === '/contact' && <Contact />}
@@ -1246,7 +1254,7 @@ export default function MubsaExperience() {
             <section className="m-section m-policy">
               <p className="m-kicker">MUBSA FIN INSTITUTE</p>
               <h1>{policy?.title || policySlug.replaceAll('-', ' ')}</h1>
-              <p>
+              <p style={{ whiteSpace: 'pre-line' }}>
                 {policy?.body ||
                   (policySlug === 'risk-disclaimer'
                     ? 'Trading and investing involve risk, including loss of capital. Mubsa provides educational information, not personalised investment advice. No course, research method, or webinar guarantees profit or future results.'
@@ -1269,6 +1277,7 @@ export default function MubsaExperience() {
               '/team',
               '/testimonials',
               '/faq',
+              '/faqs',
               '/contact',
               '/enquire',
               '/webinar'
@@ -1305,16 +1314,16 @@ export default function MubsaExperience() {
             <p>
               Build your market understanding through a structured, time-conscious approach. Mubsa Fin Institute helps learners study markets, charts, and risk with purpose.
             </p>
-            <p>MubsaCapital.com · {content.contact.location}</p>
+            <p>{content.contact?.website || 'mubsafin.com'} · {content.contact.location}</p>
             <p>
               Website :{' '}
               <a
-                href="https://mubsafin.com"
+                href={content.contact?.website?.startsWith('http') ? content.contact.website : `https://${content.contact?.website || 'mubsafin.com'}`}
                 target="_blank"
                 rel="noreferrer"
                 style={{ display: 'inline', color: 'var(--m-gold)' }}
               >
-                mubsafin.com
+                {content.contact?.website || 'mubsafin.com'}
               </a>
             </p>
             <a href={`mailto:${email}`}>{email}</a>

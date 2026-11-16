@@ -31,7 +31,7 @@ function Countdown({ startsAt }) {
   )
 }
 
-export default function WebinarLanding({ webinar, register }) {
+export default function WebinarLanding({ webinar, register, content }) {
   const date =
     webinar &&
     new Date(webinar.startsAt).toLocaleString('en-IN', {
@@ -39,6 +39,7 @@ export default function WebinarLanding({ webinar, register }) {
       timeStyle: 'short',
       timeZone: webinar.timeZone || 'Asia/Kolkata',
     })
+  const ctaLabel = webinar?.ctaLabel || content?.registrationLabel || 'REGISTER TO CLAIM YOUR SLOT'
 
   return (
     <div className="wl-page">
@@ -109,7 +110,7 @@ export default function WebinarLanding({ webinar, register }) {
               <p className="wl-date">The next session date will be announced soon. Request an update below.</p>
             )}
             <button className="m-btn wl-cta" onClick={register}>
-              REGISTER TO CLAIM YOUR SLOT
+              {ctaLabel}
             </button>
           </div>
         </div>
@@ -126,7 +127,7 @@ export default function WebinarLanding({ webinar, register }) {
       <div className="wl-sticky">
         <span>Build your market understanding with Mubsa</span>
         <button className="m-btn" onClick={register}>
-          REGISTER TO CLAIM YOUR SLOT
+          {ctaLabel}
         </button>
       </div>
     </div>

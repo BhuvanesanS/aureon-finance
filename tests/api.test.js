@@ -28,12 +28,12 @@ test('public forms, admin, publication and persistence work together', async () 
     assert.equal(config.popupEnabled,true)
     assert.equal((await call('/api/admin/content','PUT',config)).status,401)
     config.popupTitle='Test welcome'
-    config.contact={title:'Talk to our team',description:'Updated contact description',location:'Test office',email:'team@example.test',phone:'+910000000000'}
+    config.contact={title:'Talk to our team',description:'Updated contact description',location:'Test office',website:'customdomain.com',email:'team@example.test',phone:'+910000000000'}
     config.faqs=[{category:'Seminars',question:'When is the session?',answer:'See the published schedule.'}]
     config.socialLinks=[{label:'Instagram',url:'https://www.instagram.com/example'}]
     config.registrationLabel='Register here'
     config.communityLabel='Join Telegram'
-    config.courses[0]={...config.courses[0],name:'Foundations Course',description:'Updated course description',modules:[['Updated module','Updated syllabus',['First topic','Second topic']]]}
+    config.courses[0]={...config.courses[0],name:'Foundations Course',ctaLabel:'Join Foundations Now',description:'Updated course description',modules:[['Updated module','Updated syllabus',['First topic','Second topic']]]}
     config.gallery=[{title:'Approved portrait',city:'Dubai',image:'/client-portrait.jpg'}]
     config.testimonials=[{name:'Test learner',role:'Test only',quote:'',rating:5}]
     assert.equal((await call('/api/admin/content','PUT',config,true)).status,200)
@@ -47,6 +47,8 @@ test('public forms, admin, publication and persistence work together', async () 
     assert.deepEqual(publicContent.content.faqs,config.faqs)
     assert.deepEqual(publicContent.content.socialLinks,config.socialLinks)
     assert.equal(publicContent.content.courses[0].name,'Foundations Course')
+    assert.equal(publicContent.content.courses[0].ctaLabel,'Join Foundations Now')
+    assert.equal(publicContent.content.contact.website,'customdomain.com')
     assert.equal(publicContent.slides.find(s => s.id === 'course-basic').title,'Foundations Course')
     assert.equal((await call('/api/admin/content','PUT',{...config,socialLinks:[{label:'Bad',url:'javascript:alert(1)'}]},true)).status,422)
     assert.equal((await call('/api/admin/content','PUT',{...config,courses:[]},true)).status,422)
@@ -104,6 +106,12 @@ test('public forms, admin, publication and persistence work together', async () 
     const saved=JSON.parse(await readFile(join(dir,'records.json'),'utf8'))
     assert.deepEqual(saved.settings.content.faqs,config.faqs)
     assert.equal(saved.settings.content.courses[0].name,'Foundations Course')
+    const testimonialUpdate = await call('/api/admin/content','PUT',{ testimonials:[{ name:'Sarah Jenkins', role:'Chartered Accountant', rating:5, quote:'Exceptional guidance on market structure and risk management.' }] },true)
+    assert.equal(testimonialUpdate.status,200)
+    assert.equal((await call('/api/site-content')).data.content.testimonials[0].name,'Sarah Jenkins')
+    assert.equal((await call('/api/site-content')).data.content.testimonials[0].role,'Chartered Accountant')
+    assert.equal((await call('/api/site-content')).data.content.testimonials[0].rating,5)
+    assert.equal((await call('/api/admin/content','PUT',{ testimonials:[{ name:'', rating:5 }] },true)).status,422)
     const logout=await call('/api/admin/logout','POST',{},true)
     assert.match(logout.cookie,/Max-Age=0/)
   } finally { await new Promise(resolve => server.close(resolve)); await rm(dir,{recursive:true,force:true}) }

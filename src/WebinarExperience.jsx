@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { FaArrowRight, FaTelegram } from 'react-icons/fa6'
 
-export function AnnouncementTicker({ webinar, telegramUrl = 'https://t.me/mubsafin', register, slides = [] }) {
+export function AnnouncementTicker({ webinar, telegramUrl = 'https://t.me/mubsafin', register, slides = [], content }) {
   const [paused, setPaused] = useState(false)
   const date = webinar && new Date(webinar.startsAt).toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short', timeZone:webinar.timeZone || 'Asia/Kolkata' })
   const announcements = [
-    webinar ? `Join our upcoming MARKET DNA: ${webinar.title} · ${date}` : 'Join our upcoming MARKET DNA',
+    webinar ? `Join our upcoming MARKET DNA: ${webinar.title} · ${date}` : (content?.popupTitle ? `Join our upcoming: ${content.popupTitle}` : 'Join our upcoming MARKET DNA'),
     'Join our OPEN 5% CLUB on Telegram.',
     ...slides.filter(item => item.type !== 'session' && !item.id.startsWith('course-')).map(item => item.title),
   ]
@@ -31,7 +31,7 @@ export function AnnouncementTicker({ webinar, telegramUrl = 'https://t.me/mubsaf
           Webinar details <FaArrowRight />
         </button>
         <button className="m-text" onClick={openTelegram}>
-          <FaTelegram /> The 5% CLUB
+          <FaTelegram /> {content?.communityLabel || 'The 5% CLUB'}
         </button>
         <button
           className="m-icon"
@@ -49,7 +49,7 @@ export function WebinarPanel({ webinar, content, children }) {
   return (
     <>
       <p className="m-kicker">MUBSA FIN INSTITUTE · LIVE WEBINAR</p>
-      <h2>Join our upcoming Market DNA</h2>
+      <h2>{webinar?.title || content?.popupTitle || 'Join our upcoming Market DNA'}</h2>
       {webinar ? (
         <>
           <p>{webinar.description}</p>
@@ -62,7 +62,7 @@ export function WebinarPanel({ webinar, content, children }) {
       ) : (
         <>
           <p className="m-gold">Date and time</p>
-          <p>Enter your details below to register for our upcoming MARKET DNA</p>
+          <p>{content?.popupText || 'Enter your details below to register for our upcoming MARKET DNA'}</p>
         </>
       )}
       {children}
