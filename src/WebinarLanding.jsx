@@ -84,7 +84,6 @@ export default function WebinarLanding({ webinar, register, content }) {
           <div className="wl-mentor">
             <img src="/client-founder.jpg" alt="Mubarak Ahmad, founder of Mubsa Fin Institute" />
             <div>
-              <small>YOUR MENTOR</small>
               <strong>Mubarak Ahmad</strong>
               <span>Founder & Academic Director.</span>
             </div>

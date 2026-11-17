@@ -857,7 +857,6 @@ export default function MubsaExperience() {
                     height="1440"
                   />
                   <div className="m-mentor-label">
-                    <small>YOUR MENTOR</small>
                     <strong>Mubarak Ahmad</strong>
                     <span>Founder & Academic Director</span>
                   </div>
@@ -892,7 +891,12 @@ export default function MubsaExperience() {
                   <h2>Plan · Protect · Control · Review.</h2>
                   <p>Follow these four principles to trade with clarity, discipline, and responsibility.</p>
                 </div>
-                <div className="m-pillars-grid">
+                <div className="m-pillar-tree" aria-label="The four pillars of trading">
+                  <div className="m-pillar-root">
+                    <span>TRADING PROCESS</span>
+                    <strong>Trade with clarity</strong>
+                  </div>
+                  <div className="m-pillars-grid">
                   <div className="m-pillar-card">
                     <span className="m-pillar-num">PILLAR 01</span>
                     <h3>Plan</h3>
@@ -921,6 +925,7 @@ export default function MubsaExperience() {
                       Continuous evaluation helps identify mistakes and strengthen your approach. Record every trade, analyse your results, and learn from each outcome.
                     </p>
                   </div>
+                  </div>
                 </div>
               </section>
 
@@ -933,16 +938,12 @@ export default function MubsaExperience() {
                 </div>
                 <div className="m-course-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '28px' }}>
                   {courses.map((c, i) => (
-                    <article className="m-card m-course-link" key={c.slug} style={{ display: 'flex', flexDirection: 'column' }}>
+                    <button className="m-card m-course-link" key={c.slug} type="button" onClick={() => go(`/courses/${c.slug}`)} aria-label={`Explore ${c.name}`}>
                       {[<FaCompass key="a" />, <FaChartLine key="b" />, <FaClock key="c" />][i % 3]}
                       <h3>{c.name}</h3>
                       <p>{c.description}</p>
-                      <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                        <button className="m-btn small" onClick={() => go(`/courses/${c.slug}`)}>
-                          {c.ctaLabel || `Explore the ${c.name}`} <FaArrowRight />
-                        </button>
-                      </div>
-                    </article>
+                      <span className="m-course-card-cta">{c.ctaLabel || `Explore the ${c.name}`} <FaArrowRight aria-hidden="true" /></span>
+                    </button>
                   ))}
                 </div>
                 <div className="m-center" style={{ marginTop: '40px', textAlign: 'center' }}>
@@ -1135,16 +1136,12 @@ export default function MubsaExperience() {
                 </div>
                 <div className="m-course-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '28px', marginTop: '40px' }}>
                   {courses.map((c, i) => (
-                    <article className="m-card m-course-link" key={c.slug} style={{ display: 'flex', flexDirection: 'column' }}>
+                    <button className="m-card m-course-link" key={c.slug} type="button" onClick={() => go(`/courses/${c.slug}`)} aria-label={`Explore ${c.name}`}>
                       {[<FaCompass key="a" />, <FaChartLine key="b" />, <FaClock key="c" />][i % 3]}
                       <h3>{c.name}</h3>
                       <p>{c.description}</p>
-                      <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                        <button className="m-btn small" onClick={() => go(`/courses/${c.slug}`)}>
-                          {c.ctaLabel || `Explore the ${c.name}`} <FaArrowRight />
-                        </button>
-                      </div>
-                    </article>
+                      <span className="m-course-card-cta">{c.ctaLabel || `Explore the ${c.name}`} <FaArrowRight aria-hidden="true" /></span>
+                    </button>
                   ))}
                 </div>
                 <div className="m-center" style={{ marginTop: '48px', textAlign: 'center' }}>
@@ -1359,7 +1356,7 @@ export default function MubsaExperience() {
           </div>
         </footer>
 
-        <SocialDock links={content.socialLinks} telegramUrl={telegramUrl} />
+        <SocialDock whatsappUrl={whatsappUrl} />
         <BackToTop />
 
         {modal && (
@@ -1373,7 +1370,6 @@ export default function MubsaExperience() {
                 <div className="m-webinar-mentor">
                   <img src={founder} alt="Mubarak Ahmad, Founder & Academic Director" />
                   <div className="m-mentor-label">
-                    <small>YOUR MENTOR</small>
                     <strong>Mubarak Ahmad</strong>
                     <span>Founder & Academic Director</span>
                   </div>

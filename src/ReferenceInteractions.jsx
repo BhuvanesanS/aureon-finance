@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import { FaWhatsapp, FaTelegram, FaInstagram, FaFacebookF, FaYoutube, FaLinkedinIn, FaXTwitter, FaLink, FaXmark, FaArrowUp, FaPaperPlane, FaClock, FaBorderAll, FaCompassDrafting, FaBullseye, FaCircleNotch, FaQuoteLeft, FaStar } from 'react-icons/fa6'
+import { FaWhatsapp, FaXmark, FaArrowUp, FaPaperPlane, FaClock, FaBorderAll, FaCompassDrafting, FaBullseye, FaCircleNotch, FaQuoteLeft, FaStar } from 'react-icons/fa6'
 import { whatsappDestination } from './whatsapp'
 
-const networks = { instagram: FaInstagram, facebook: FaFacebookF, youtube: FaYoutube, linkedin: FaLinkedinIn, telegram: FaTelegram, x: FaXTwitter, twitter: FaXTwitter }
-export function SocialDock({ links, telegramUrl }) {
-  const items = [...(telegramUrl ? [{ label: 'Telegram', url: telegramUrl }] : []), ...links]
-  if (!items.length) return null
-  return <aside className="m-social-dock" aria-label="Follow Mubsa">{items.map(({label,url}) => {
-    const key = Object.keys(networks).find(k => label.toLowerCase() === k || (k.length > 1 && label.toLowerCase().includes(k)))
-    const Icon = networks[key] || FaLink
-    return <a key={label+url} href={url} target="_blank" rel="noreferrer" aria-label={label} title={label}><Icon aria-hidden="true" /></a>
-  })}</aside>
+export function SocialDock({ whatsappUrl }) {
+  if (!whatsappUrl) return null
+  return (
+    <aside className="m-social-dock" aria-label="Contact Mubsa">
+      <a href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp" title="Chat on WhatsApp">
+        <FaWhatsapp aria-hidden="true" />
+      </a>
+    </aside>
+  )
 }
 
 export function WhatsAppPanel({ url }) {

@@ -4,8 +4,10 @@ import { FaArrowRight, FaTelegram } from 'react-icons/fa6'
 export function AnnouncementTicker({ webinar, telegramUrl = 'https://t.me/mubsafin', register, slides = [], content }) {
   const [paused, setPaused] = useState(false)
   const date = webinar && new Date(webinar.startsAt).toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short', timeZone:webinar.timeZone || 'Asia/Kolkata' })
+  const rawWebinarTitle = webinar?.title || content?.popupTitle || 'Market DNA'
+  const webinarTitle = rawWebinarTitle.replace(/^join our upcoming\s*:?\s*/i, '').trim() || 'Market DNA'
   const announcements = [
-    webinar ? `Join our upcoming MARKET DNA: ${webinar.title} · ${date}` : (content?.popupTitle ? `Join our upcoming: ${content.popupTitle}` : 'Join our upcoming MARKET DNA'),
+    webinar ? `Upcoming session: ${webinarTitle} · ${date}` : `Upcoming session: ${webinarTitle}`,
     'Join our OPEN 5% CLUB on Telegram.',
     ...slides.filter(item => item.type !== 'session' && !item.id.startsWith('course-')).map(item => item.title),
   ]
@@ -28,7 +30,7 @@ export function AnnouncementTicker({ webinar, telegramUrl = 'https://t.me/mubsaf
       </div>
       <div className="m-ticker-actions">
         <button className="m-text" onClick={register}>
-          Webinar details <FaArrowRight />
+          Details <FaArrowRight />
         </button>
         <button className="m-text" onClick={openTelegram}>
           <FaTelegram /> {content?.communityLabel || 'The 5% CLUB'}
