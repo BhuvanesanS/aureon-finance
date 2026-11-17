@@ -1,5 +1,5 @@
 html { scroll-behavior:smooth; background:#081A11; color-scheme:dark; }
-body { margin:0; min-width:320px; }
+body { margin:0; min-width:0; }
 :root { --m-bg:#081A11; --m-panel:#244228; --m-soft:#16331E; --m-text:#F2FBEC; --m-muted:#B5C9B7; --m-line:#45594B; --m-gold:#AFE163; --m-field:#16331E; }
 :root[data-theme=light] { color-scheme:light; --m-bg:#F2FBEC; --m-panel:#fff; --m-soft:#e3eddf; --m-text:#081A11; --m-muted:#45594B; --m-line:#647B62; --m-gold:#244228; --m-field:#F2FBEC; background:var(--m-bg); }
 .mubsa-site { font-family:Manrope,Arial,sans-serif; background:var(--m-bg); color:var(--m-text); overflow-x:clip; line-height:1.65; }

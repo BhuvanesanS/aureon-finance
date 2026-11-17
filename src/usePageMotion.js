@@ -10,6 +10,10 @@ export function usePageMotion(path) {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue
         observer.unobserve(entry.target)
+        if (entry.target.classList.contains('m-pillar-tree')) {
+          entry.target.classList.add('is-revealed')
+          continue
+        }
         const animation = entry.target.animate([
           { opacity: 0, transform: 'translateY(28px)' },
           { opacity: 1, transform: 'translateY(0)' },
@@ -18,7 +22,7 @@ export function usePageMotion(path) {
         animation.onfinish = () => animations.delete(animation)
       }
     }, { threshold: .08 })
-    document.querySelectorAll('.m-heading,.m-intro>div,.m-course-link,.m-topic-tile,.m-team>div,.m-gallery>button,.m-principles>div,.m-focus-row,.m-book-section>div,.m-community,.m-faq details,.m-contact>div,.m-contact>.m-form,.m-modules details').forEach(el => observer.observe(el))
+    document.querySelectorAll('.m-heading,.m-intro>div,.m-course-link,.m-topic-tile,.m-team>div,.m-gallery>button,.m-principles>div,.m-pillar-tree,.m-focus-row,.m-book-section>div,.m-community,.m-faq details,.m-contact>div,.m-contact>.m-form,.m-modules details').forEach(el => observer.observe(el))
     const cancel = () => { if (reduced.matches) { observer.disconnect(); animations.forEach(a => a.cancel()) } }
     reduced.addEventListener('change', cancel)
     return () => { observer.disconnect(); animations.forEach(a => a.cancel()); reduced.removeEventListener('change', cancel) }

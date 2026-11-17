@@ -14,7 +14,8 @@ import {
   FaArrowRight,
   FaChartLine,
   FaCompass,
-  FaClock
+  FaClock,
+  FaPlus
 } from 'react-icons/fa6'
 import AdminDashboard from './AdminDashboard'
 import { defaultContent as defaults } from './siteDefaults'
@@ -24,6 +25,7 @@ import { SocialDock, BackToTop } from './ReferenceInteractions'
 import TestimonialsShowcase from './TestimonialsShowcase'
 import './reference-refinements.css'
 import './motion.css'
+import './course-dna.css'
 import WebinarLanding from './WebinarLanding'
 import { usePageMotion } from './usePageMotion'
 
@@ -544,6 +546,44 @@ function Contact() {
   )
 }
 
+function MarketDnaCoursePage({ courses, go }) {
+  const stages = [
+    ['01', 'Learn', 'Build clear market foundations.'],
+    ['02', 'Analyse', 'Read price and market information.'],
+    ['03', 'Plan', 'Create a structured approach.'],
+    ['04', 'Practice', 'Apply concepts with guided exercises.'],
+    ['05', 'Progress', 'Strengthen independent thinking.']
+  ]
+
+  return <div className="m-dna-course-page">
+    <section className="m-dna-course-hero">
+      <div className="m-dna-course-copy">
+        <p className="m-kicker">MARKET DNA · LEARNING PROGRAMME</p>
+        <h1>Your first step on <span>Market DNA</span></h1>
+        <p>A structured, practical programme to help you understand financial markets, build the right skills, and develop a disciplined, informed approach to learning.</p>
+        <div className="m-dna-course-actions">
+          <button className="m-btn" onClick={() => go('/enquire?course=Basic%20Course')}>Explore the programme <FaArrowRight aria-hidden="true" /></button>
+          <button className="m-text" onClick={() => document.getElementById('market-dna-path')?.scrollIntoView({ behavior: 'smooth' })}>View the learning path</button>
+        </div>
+        <div className="m-dna-course-promises">
+          <span><FaCompass aria-hidden="true" />Structured learning</span><span><FaChartLine aria-hidden="true" />Skill-focused</span><span><FaClock aria-hidden="true" />Learn at your pace</span>
+        </div>
+      </div>
+      <figure className="m-dna-course-mentor"><img src={founder} alt="Mubsa Fin Institute founder and mentor" /><figcaption><span>Your mentor</span><strong>Mubarak Ahmad</strong><small>Founder &amp; Academic Director</small></figcaption></figure>
+    </section>
+    <section className="m-dna-roadmap" aria-label="Market DNA learning stages">
+      {stages.map(([number, title, text], index) => <div className="m-dna-stage" key={number}><span>{number}</span><strong>{title}</strong><small>{text}</small>{index < stages.length - 1 && <i aria-hidden="true" />}</div>)}
+    </section>
+    <section className="m-dna-curriculum" id="market-dna-path">
+      <div className="m-dna-section-intro"><div><p className="m-kicker">PROGRAMME SYLLABUS</p><h2>A complete, beginner-friendly learning path.</h2></div><p>Choose the level that fits your current knowledge. Each course makes the next learning step clear.</p></div>
+      <div className="m-dna-course-list">
+        {courses.map((course, index) => <button className="m-dna-course-item" key={course.slug} onClick={() => go(`/courses/${course.slug}`)}><span className="m-dna-course-number">{course.number || `0${index + 1}`}</span><span className="m-dna-course-info"><strong>{course.name}</strong><small>{course.description}</small></span><span className="m-dna-course-modules">{course.modules?.length || 0} modules</span><FaArrowRight aria-hidden="true" /></button>)}
+      </div>
+    </section>
+    <section className="m-dna-mentor-story"><div><p className="m-kicker">LEARN WITH PURPOSE</p><h2>Build knowledge before making decisions.</h2><p>Market DNA focuses on practical education, chart study, risk awareness, and disciplined learning. It does not promise returns or provide personal financial advice.</p></div><div className="m-dna-mentor-points"><span><b>01</b> Clear concepts, explained in a practical way</span><span><b>02</b> A structured path from basics to advanced study</span><span><b>03</b> Focus on discipline, practice, and independent thinking</span></div></section>
+  </div>
+}
+
 export default function MubsaExperience() {
   const [path, setPath] = useState(window.location.pathname)
   const [anchor, setAnchor] = useState(window.location.hash)
@@ -892,39 +932,22 @@ export default function MubsaExperience() {
                   <p>Follow these four principles to trade with clarity, discipline, and responsibility.</p>
                 </div>
                 <div className="m-pillar-tree" aria-label="The four pillars of trading">
-                  <div className="m-pillar-root">
-                    <span>TRADING PROCESS</span>
-                    <strong>Trade with clarity</strong>
-                  </div>
                   <div className="m-pillars-grid">
-                  <div className="m-pillar-card">
-                    <span className="m-pillar-num">PILLAR 01</span>
-                    <h3>Plan</h3>
-                    <p>
-                      A clear trading strategy provides direction and purpose to every trade. Define your entry, exit, and trading conditions before entering.
-                    </p>
-                  </div>
-                  <div className="m-pillar-card">
-                    <span className="m-pillar-num">PILLAR 02</span>
-                    <h3>Protect</h3>
-                    <p>
-                      Preserving capital is essential for long-term participation in the markets. Set your stop-loss and calculate your risk before every trade.
-                    </p>
-                  </div>
-                  <div className="m-pillar-card">
-                    <span className="m-pillar-num">PILLAR 03</span>
-                    <h3>Control</h3>
-                    <p>
-                      Emotional discipline helps maintain consistency during market fluctuations. Avoid impulsive decisions and follow your trading plan.
-                    </p>
-                  </div>
-                  <div className="m-pillar-card">
-                    <span className="m-pillar-num">PILLAR 04</span>
-                    <h3>Review</h3>
-                    <p>
-                      Continuous evaluation helps identify mistakes and strengthen your approach. Record every trade, analyse your results, and learn from each outcome.
-                    </p>
-                  </div>
+                    {[
+                      { number: 'PILLAR 01', title: 'Plan', text: 'Define your entry, exit, and trading conditions before entering.' },
+                      { number: 'PILLAR 02', title: 'Protect', text: 'Preserve capital with a clear stop-loss and calculated risk.' },
+                      { number: 'PILLAR 03', title: 'Control', text: 'Stay disciplined through changing market conditions.' },
+                      { number: 'PILLAR 04', title: 'Review', text: 'Record, analyse, and learn from every trade outcome.' }
+                    ].map(({ number, title, text }) => (
+                      <article className="m-pillar-card" key={number}>
+                        <span className="m-pillar-icon"><FaPlus aria-hidden="true" /></span>
+                        <span className="m-pillar-copy">
+                          <span className="m-pillar-num">{number}</span>
+                          <h3>{title}</h3>
+                          <p>{text}</p>
+                        </span>
+                      </article>
+                    ))}
                   </div>
                 </div>
               </section>
@@ -1128,29 +1151,7 @@ export default function MubsaExperience() {
 
           {/* COURSES DIRECTORY */}
           {(path === '/courses' || path === '/services') && (
-            <div className="m-page">
-              <section className="m-section m-tone">
-                <div className="m-heading">
-                  <h2>Inside Our Curriculum</h2>
-                  <p>From Market Fundamentals to Advanced Analysis. Learn with purpose. Progress with knowledge.</p>
-                </div>
-                <div className="m-course-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '28px', marginTop: '40px' }}>
-                  {courses.map((c, i) => (
-                    <button className="m-card m-course-link" key={c.slug} type="button" onClick={() => go(`/courses/${c.slug}`)} aria-label={`Explore ${c.name}`}>
-                      {[<FaCompass key="a" />, <FaChartLine key="b" />, <FaClock key="c" />][i % 3]}
-                      <h3>{c.name}</h3>
-                      <p>{c.description}</p>
-                      <span className="m-course-card-cta">{c.ctaLabel || `Explore the ${c.name}`} <FaArrowRight aria-hidden="true" /></span>
-                    </button>
-                  ))}
-                </div>
-                <div className="m-center" style={{ marginTop: '48px', textAlign: 'center' }}>
-                  <button className="m-btn secondary" onClick={() => go('/enquire')}>
-                    Help me choose a course
-                  </button>
-                </div>
-              </section>
-            </div>
+            <MarketDnaCoursePage courses={courses} go={go} />
           )}
 
           {/* COURSE DETAIL PAGE */}
@@ -1356,7 +1357,7 @@ export default function MubsaExperience() {
           </div>
         </footer>
 
-        <SocialDock whatsappUrl={whatsappUrl} />
+        <SocialDock links={content.socialLinks} telegramUrl={telegramUrl} whatsappUrl={whatsappUrl} />
         <BackToTop />
 
         {modal && (

@@ -1,14 +1,49 @@
 import { useEffect, useRef, useState } from 'react'
-import { FaWhatsapp, FaXmark, FaArrowUp, FaPaperPlane, FaClock, FaBorderAll, FaCompassDrafting, FaBullseye, FaCircleNotch, FaQuoteLeft, FaStar } from 'react-icons/fa6'
+import { FaWhatsapp, FaTelegram, FaInstagram, FaFacebookF, FaYoutube, FaLinkedinIn, FaXTwitter, FaLink, FaXmark, FaArrowUp, FaPaperPlane, FaClock, FaBorderAll, FaCompassDrafting, FaBullseye, FaCircleNotch, FaQuoteLeft, FaStar } from 'react-icons/fa6'
 import { whatsappDestination } from './whatsapp'
 
-export function SocialDock({ whatsappUrl }) {
-  if (!whatsappUrl) return null
+const socialIcons = {
+  whatsapp: FaWhatsapp,
+  telegram: FaTelegram,
+  instagram: FaInstagram,
+  facebook: FaFacebookF,
+  youtube: FaYoutube,
+  linkedin: FaLinkedinIn,
+  x: FaXTwitter,
+  twitter: FaXTwitter
+}
+
+function socialIconFor(label = '') {
+  const normalized = label.trim().toLowerCase()
+  const key = Object.keys(socialIcons).find((network) => normalized === network || normalized.includes(network))
+  return socialIcons[key] || FaLink
+}
+
+export function SocialDock({ links = [], telegramUrl, whatsappUrl }) {
+  const seenNetworks = new Set()
+  const socialLinks = [
+    ...(whatsappUrl ? [{ label: 'WhatsApp', url: whatsappUrl }] : []),
+    ...(telegramUrl ? [{ label: 'Telegram', url: telegramUrl }] : []),
+    ...links
+  ].filter(({ label, url }) => {
+    const network = label?.trim().toLowerCase()
+    if (!network || !url || seenNetworks.has(network)) return false
+    seenNetworks.add(network)
+    return true
+  })
+
+  if (!socialLinks.length) return null
+
   return (
-    <aside className="m-social-dock" aria-label="Contact Mubsa">
-      <a href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp" title="Chat on WhatsApp">
-        <FaWhatsapp aria-hidden="true" />
-      </a>
+    <aside className="m-social-dock" aria-label="Mubsa social media links">
+      {socialLinks.map(({ label, url }) => {
+        const Icon = socialIconFor(label)
+        return (
+          <a key={`${label}-${url}`} href={url} target="_blank" rel="noreferrer" aria-label={`Visit Mubsa on ${label}`} title={label}>
+            <Icon aria-hidden="true" />
+          </a>
+        )
+      })}
     </aside>
   )
 }
