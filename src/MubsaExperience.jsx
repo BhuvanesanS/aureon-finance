@@ -7,6 +7,7 @@ import {
   FaYoutube,
   FaLinkedinIn,
   FaXTwitter,
+  FaThreads,
   FaSun,
   FaMoon,
   FaBars,
@@ -45,10 +46,11 @@ const indianStatesAndUTs = [
 
 const socialNetworks = [
   { label: 'Telegram', url: 'https://t.me/mubsafin', icon: FaTelegram },
-  { label: 'Instagram', url: 'https://instagram.com/mubsafin', icon: FaInstagram },
-  { label: 'YouTube', url: 'https://youtube.com/@mubsafin', icon: FaYoutube },
+  { label: 'Instagram', url: 'https://www.instagram.com/grow.with.mubsa/', icon: FaInstagram },
+  { label: 'YouTube', url: 'https://www.youtube.com/@GrowWithGroups', icon: FaYoutube },
   { label: 'LinkedIn', url: 'https://linkedin.com/company/mubsafin', icon: FaLinkedinIn },
-  { label: 'Facebook', url: 'https://facebook.com/mubsafin', icon: FaFacebookF },
+  { label: 'Facebook', url: 'https://www.facebook.com/profile.php?id=61596730557828', icon: FaFacebookF },
+  { label: 'Threads', url: 'https://www.threads.com/@grow.with.mubsa', icon: FaThreads },
   { label: 'X', url: 'https://x.com/mubsafin', icon: FaXTwitter }
 ]
 

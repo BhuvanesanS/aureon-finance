@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { FaWhatsapp, FaTelegram, FaInstagram, FaFacebookF, FaYoutube, FaLinkedinIn, FaXTwitter, FaLink, FaXmark, FaArrowUp, FaPaperPlane, FaClock, FaBorderAll, FaCompassDrafting, FaBullseye, FaCircleNotch, FaQuoteLeft, FaStar } from 'react-icons/fa6'
+import { FaWhatsapp, FaTelegram, FaInstagram, FaFacebookF, FaYoutube, FaLinkedinIn, FaXTwitter, FaThreads, FaLink, FaXmark, FaArrowUp, FaPaperPlane, FaClock, FaBorderAll, FaCompassDrafting, FaBullseye, FaCircleNotch, FaQuoteLeft, FaStar } from 'react-icons/fa6'
 import { whatsappDestination } from './whatsapp'
 
 const socialIcons = {
@@ -9,6 +9,7 @@ const socialIcons = {
   facebook: FaFacebookF,
   youtube: FaYoutube,
   linkedin: FaLinkedinIn,
+  threads: FaThreads,
   x: FaXTwitter,
   twitter: FaXTwitter
 }

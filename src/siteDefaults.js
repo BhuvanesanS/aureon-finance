@@ -22,10 +22,11 @@ export const defaultContent = {
   communityLabel: 'The 5% CLUB',
   socialLinks: [
     { label: 'Telegram', url: 'https://t.me/mubsafin' },
-    { label: 'Instagram', url: 'https://instagram.com/mubsafin' },
-    { label: 'YouTube', url: 'https://youtube.com/@mubsafin' },
+    { label: 'Instagram', url: 'https://www.instagram.com/grow.with.mubsa/' },
+    { label: 'YouTube', url: 'https://www.youtube.com/@GrowWithGroups' },
     { label: 'LinkedIn', url: 'https://linkedin.com/company/mubsafin' },
-    { label: 'Facebook', url: 'https://facebook.com/mubsafin' },
+    { label: 'Facebook', url: 'https://www.facebook.com/profile.php?id=61596730557828' },
+    { label: 'Threads', url: 'https://www.threads.com/@grow.with.mubsa' },
     { label: 'X', url: 'https://x.com/mubsafin' }
   ],
   courses,
