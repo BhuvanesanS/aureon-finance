@@ -54,20 +54,31 @@ async function serveFrontend(request, response, pathname) {
   try {
     body = await readFile(filePath)
   } catch {
-    if (extname(requestedPath)) {
-      response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' })
-      response.end('Not found.')
-      return
+    const publicCandidate = resolve('public', `.${requestedPath}`)
+    const safePublic = publicCandidate === resolve('public') || publicCandidate.startsWith(`${resolve('public')}${sep}`)
+    if (safePublic) {
+      try {
+        body = await readFile(publicCandidate)
+        filePath = publicCandidate
+      } catch {}
     }
-    filePath = resolve(staticDirectory, 'index.html')
-    try { body = await readFile(filePath) } catch {
-      response.writeHead(503, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' })
-      response.end('The frontend build is not available.')
-      return
+
+    if (!body) {
+      if (extname(requestedPath)) {
+        response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' })
+        response.end('Not found.')
+        return
+      }
+      filePath = resolve(staticDirectory, 'index.html')
+      try { body = await readFile(filePath) } catch {
+        response.writeHead(503, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' })
+        response.end('The frontend build is not available.')
+        return
+      }
     }
   }
   const extension = extname(filePath).toLowerCase()
-  const cacheControl = filePath.includes(`${sep}assets${sep}`) ? 'public, max-age=31536000, immutable' : 'no-cache'
+  const cacheControl = filePath.includes(`${sep}assets${sep}`) || filePath.includes(`${sep}uploads${sep}`) ? 'public, max-age=31536000, immutable' : 'no-cache'
   response.writeHead(200, { 'Content-Type': contentTypes[extension] || 'application/octet-stream', 'Cache-Control': cacheControl })
   response.end(request.method === 'HEAD' ? undefined : body)
 }
@@ -147,11 +158,11 @@ function validHttpsUrl(value, allowedHosts = []) {
   }
 }
 
-async function readJson(request) {
+async function readJson(request, maxBytes = 15_000_000) {
   let body = ''
   for await (const chunk of request) {
     body += chunk
-    if (body.length > 100_000) throw new Error('Request body is too large.')
+    if (body.length > maxBytes) throw new Error('Request body is too large.')
   }
   try {
     return JSON.parse(body || '{}')
@@ -471,6 +482,83 @@ export function createApiServer() {
         catch (error) { send(response, 422, { message: error.message }); return }
         await updateStore((store) => { store.settings.content = content })
         send(response, 200, content)
+        return
+      }
+      if (method === 'POST' && url.pathname === '/api/admin/upload') {
+        const payload = await readJson(request, 15_000_000)
+        const { filename, data } = payload || {}
+        if (!data || typeof data !== 'string') {
+          send(response, 422, { message: 'Provide image data.' })
+          return
+        }
+        const match = data.match(/^data:image\/(png|jpe?g|webp|svg\+xml|gif);base64,(.+)$/i)
+        let ext = 'jpg'
+        let buffer
+        if (match) {
+          const rawType = match[1].toLowerCase()
+          ext = rawType === 'svg+xml' ? 'svg' : rawType === 'jpeg' ? 'jpg' : rawType
+          buffer = Buffer.from(match[2], 'base64')
+        } else {
+          const cleanExt = (filename ? extname(filename).slice(1) : 'jpg').toLowerCase()
+          if (!['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif'].includes(cleanExt)) {
+            send(response, 422, { message: 'Only PNG, JPG, WEBP, SVG, and GIF images are allowed.' })
+            return
+          }
+          ext = cleanExt === 'jpeg' ? 'jpg' : cleanExt
+          buffer = Buffer.from(data, 'base64')
+        }
+        if (!buffer || buffer.length === 0) {
+          send(response, 422, { message: 'Invalid image data.' })
+          return
+        }
+        if (buffer.length > 10 * 1024 * 1024) {
+          send(response, 422, { message: 'Image must be smaller than 10 MB.' })
+          return
+        }
+        const safeBase = (filename ? filename.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 30) : 'image')
+        const newName = `${Date.now()}-${randomUUID().slice(0, 8)}-${safeBase}.${ext}`
+        const relativeUrl = `/uploads/${newName}`
+
+        const publicUploads = resolve('public', 'uploads')
+        const distUploads = resolve('dist', 'uploads')
+        await mkdir(publicUploads, { recursive: true }).catch(() => {})
+        await mkdir(distUploads, { recursive: true }).catch(() => {})
+        await writeFile(join(publicUploads, newName), buffer)
+        await writeFile(join(distUploads, newName), buffer).catch(() => {})
+
+        const mediaItem = {
+          id: randomUUID(),
+          name: filename || newName,
+          url: relativeUrl,
+          size: buffer.length,
+          uploadedAt: new Date().toISOString()
+        }
+
+        try {
+          await updateStore((store) => {
+            store.settings.mediaLibrary ||= []
+            store.settings.mediaLibrary.unshift(mediaItem)
+            if (store.settings.mediaLibrary.length > 100) {
+              store.settings.mediaLibrary = store.settings.mediaLibrary.slice(0, 100)
+            }
+          })
+        } catch {}
+
+        send(response, 201, { url: relativeUrl, name: newName, item: mediaItem })
+        return
+      }
+      if (method === 'GET' && url.pathname === '/api/admin/media') {
+        const store = await readStore()
+        send(response, 200, { items: store.settings.mediaLibrary || [] })
+        return
+      }
+      if (method === 'DELETE' && /^\/api\/admin\/media\/[\w-]+$/.test(url.pathname)) {
+        const id = url.pathname.split('/').at(-1)
+        await updateStore((store) => {
+          store.settings.mediaLibrary ||= []
+          store.settings.mediaLibrary = store.settings.mediaLibrary.filter(item => item.id !== id)
+        })
+        send(response, 200, { success: true })
         return
       }
       if (method === 'PATCH' && /^\/api\/admin\/bookings\/[\w-]+$/.test(url.pathname)) {
