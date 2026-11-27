@@ -32,3 +32,8 @@ mubsa-admin-preview.jpg
 *.njsproj
 *.sln
 *.sw?
+
+# User media uploads
+public/uploads/*
+!public/uploads/.gitkeep
+
