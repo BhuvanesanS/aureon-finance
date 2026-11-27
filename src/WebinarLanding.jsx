@@ -46,8 +46,8 @@ export default function WebinarLanding({ webinar, register, content }) {
       <div className="wl-top">
         <a href="/" className="wl-brand">
           <img
-            src="/mubsa-logo.jpg"
-            alt="Mubsa Fin Institute"
+            src={content?.brand?.logo || "/mubsa-logo.jpg"}
+            alt={content?.brand?.name || "Mubsa Fin Institute"}
             style={{ height: '34px', width: 'auto', borderRadius: '4px', verticalAlign: 'middle' }}
           />
         </a>
@@ -82,10 +82,10 @@ export default function WebinarLanding({ webinar, register, content }) {
 
         <div className="wl-introduction">
           <div className="wl-mentor">
-            <img src="/client-founder.jpg" alt="Mubarak Ahmad, founder of Mubsa Fin Institute" />
+            <img src={content?.about?.founderMentorImage || "/client-founder.jpg"} alt={content?.about?.founderName ? `${content.about.founderName}, ${content.about.founderRole}` : "Mubarak Ahmad, founder of Mubsa Fin Institute"} />
             <div>
-              <strong>Mubarak Ahmad</strong>
-              <span>Founder & Academic Director.</span>
+              <strong>{content?.about?.founderName || "Mubarak Ahmad"}</strong>
+              <span>{content?.about?.founderRole || "Founder & Academic Director."}</span>
             </div>
           </div>
           <div className="wl-highlights">

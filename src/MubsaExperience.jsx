@@ -549,13 +549,22 @@ function Contact() {
 }
 
 function MarketDnaCoursePage({ courses, go }) {
-  const stages = [
-    ['01', 'Learn', 'Build clear market foundations.'],
-    ['02', 'Analyse', 'Read price and market information.'],
-    ['03', 'Plan', 'Create a structured approach.'],
-    ['04', 'Practice', 'Apply concepts with guided exercises.'],
-    ['05', 'Progress', 'Strengthen independent thinking.']
-  ]
+  const { content } = useContext(SiteContext) || {}
+  const stages = (content?.stages && content.stages.length)
+    ? content.stages.map(s => [s.number, s.title, s.text])
+    : [
+        ['01', 'Learn', 'Build clear market foundations.'],
+        ['02', 'Analyse', 'Read price and market information.'],
+        ['03', 'Plan', 'Create a structured approach.'],
+        ['04', 'Practice', 'Apply concepts with guided exercises.'],
+        ['05', 'Progress', 'Strengthen independent thinking.']
+      ]
+  const promises = (content?.promises && content.promises.length)
+    ? content.promises
+    : [{ title: 'Structured learning' }, { title: 'Skill-focused' }, { title: 'Learn at your pace' }]
+  const mentorImg = content?.about?.founderMentorImage || founder
+  const mentorName = content?.about?.founderName || 'Mubarak Ahmad'
+  const mentorRole = content?.about?.founderRole || 'Founder & Academic Director'
 
   return <div className="m-dna-course-page">
     <section className="m-dna-course-hero">
@@ -568,10 +577,14 @@ function MarketDnaCoursePage({ courses, go }) {
           <button className="m-text" onClick={() => document.getElementById('market-dna-path')?.scrollIntoView({ behavior: 'smooth' })}>View the learning path</button>
         </div>
         <div className="m-dna-course-promises">
-          <span><FaCompass aria-hidden="true" />Structured learning</span><span><FaChartLine aria-hidden="true" />Skill-focused</span><span><FaClock aria-hidden="true" />Learn at your pace</span>
+          {promises.map((p, idx) => {
+            const icons = [FaCompass, FaChartLine, FaClock]
+            const Icon = icons[idx % icons.length]
+            return <span key={idx}><Icon aria-hidden="true" />{p.title}</span>
+          })}
         </div>
       </div>
-      <figure className="m-dna-course-mentor"><img src={founder} alt="Mubsa Fin Institute founder and mentor" /><figcaption><span>Your mentor</span><strong>Mubarak Ahmad</strong><small>Founder &amp; Academic Director</small></figcaption></figure>
+      <figure className="m-dna-course-mentor"><img src={mentorImg} alt={mentorName} /><figcaption><span>Your mentor</span><strong>{mentorName}</strong><small>{mentorRole}</small></figcaption></figure>
     </section>
     <section className="m-dna-roadmap" aria-label="Market DNA learning stages">
       {stages.map(([number, title, text], index) => <div className="m-dna-stage" key={number}><span>{number}</span><strong>{title}</strong><small>{text}</small>{index < stages.length - 1 && <i aria-hidden="true" />}</div>)}
@@ -675,8 +688,10 @@ export default function MubsaExperience() {
     const label = path.startsWith('/courses/')
       ? courses.find(c => path === `/courses/${c.slug}`)?.name
       : titles[path]
-    document.title = label ? `${label} | Mubsa Fin Institute` : 'Mubsa Fin Institute° — We Grow Together'
-  }, [path, courses])
+    const siteTitle = content.brand?.name || 'Mubsa Fin Institute°'
+    const siteTagline = content.brand?.tagline || 'We Grow Together'
+    document.title = label ? `${label} | ${siteTitle}` : `${siteTitle} — ${siteTagline}`
+  }, [path, courses, content.brand?.name, content.brand?.tagline])
 
   useEffect(() => {
     if (anchor) requestAnimationFrame(() => document.getElementById(anchor.slice(1))?.scrollIntoView())
@@ -788,13 +803,13 @@ export default function MubsaExperience() {
                 }}
               >
                 <img
-                  src="/mubsa-logo.jpg"
-                  alt="Mubsa Fin Institute° — We Grow Together"
+                  src={content.brand?.logo || "/mubsa-logo.jpg"}
+                  alt={`${content.brand?.name || 'Mubsa Fin Institute°'} — ${content.brand?.tagline || 'We Grow Together'}`}
                   className="m-brand-img"
                 />
                 <div className="m-brand-title">
-                  <strong>Mubsa Fin Institute°</strong>
-                  <small>We Grow Together</small>
+                  <strong>{content.brand?.name || 'Mubsa Fin Institute°'}</strong>
+                  <small>{content.brand?.tagline || 'We Grow Together'}</small>
                 </div>
               </a>
 
@@ -817,8 +832,8 @@ export default function MubsaExperience() {
                 {navLink('FAQs', '/faq')}
                 {navLink('Contact', '/contact')}
                 <div className="m-mobile-links">
-                  <button className="m-btn small" onClick={openTelegram}>
-                    MUBSA MAGIC <FaArrowRight />
+                  <button className="m-btn small" onClick={() => content.brand?.headerCtaUrl ? window.open(content.brand.headerCtaUrl, '_blank', 'noopener,noreferrer') : openTelegram()}>
+                    {content.brand?.headerCtaLabel || 'MUBSA MAGIC'} <FaArrowRight />
                   </button>
                 </div>
               </nav>
@@ -831,8 +846,8 @@ export default function MubsaExperience() {
                 >
                   {theme === 'dark' ? <FaSun /> : <FaMoon />}
                 </button>
-                <button className="m-btn small" onClick={openTelegram}>
-                  MUBSA MAGIC <FaArrowRight />
+                <button className="m-btn small" onClick={() => content.brand?.headerCtaUrl ? window.open(content.brand.headerCtaUrl, '_blank', 'noopener,noreferrer') : openTelegram()}>
+                  {content.brand?.headerCtaLabel || 'MUBSA MAGIC'} <FaArrowRight />
                 </button>
               </div>
             </header>
@@ -869,45 +884,49 @@ export default function MubsaExperience() {
               {/* Hero Banner */}
               <section className="m-hero">
                 <div className="m-hero-copy">
-                  <p className="m-kicker">MARKET INTELLIGENCE · STRATEGIC ANALYSIS · RISK DISCIPLINE</p>
-                  <h1>
-                    Don't just follow the market.<br />
-                    <em>Learn to read it.</em>
+                  <p className="m-kicker">{content.hero?.kicker || 'MARKET INTELLIGENCE · STRATEGIC ANALYSIS · RISK DISCIPLINE'}</p>
+                  <h1 style={{ whiteSpace: 'pre-line' }}>
+                    {content.hero?.title || (
+                      <>
+                        Don't just follow the market.<br />
+                        <em>Learn to read it.</em>
+                      </>
+                    )}
                   </h1>
                   <p>
-                    At Mubsa Fin Institute, we provide structured market education, practical chart analysis, and focused learning in trading strategies, risk management and learn to approach every trade with a clear strategy and disciplined mind set.
+                    {content.hero?.text || 'At Mubsa Fin Institute, we provide structured market education, practical chart analysis, and focused learning in trading strategies, risk management and learn to approach every trade with a clear strategy and disciplined mind set.'}
                   </p>
                   <div className="m-actions m-hero-actions">
-                    <button className="m-btn" onClick={() => go('/webinar')}>
-                      Join MARKET DNA <FaArrowRight />
+                    <button className="m-btn" onClick={() => go(content.hero?.primaryCtaLink || '/webinar')}>
+                      {content.hero?.primaryCtaText || 'Join MARKET DNA'} <FaArrowRight />
                     </button>
-                    <button className="m-btn secondary" onClick={() => go('/courses')}>
-                      Explore Courses <FaArrowRight />
+                    <button className="m-btn secondary" onClick={() => go(content.hero?.secondaryCtaLink || '/courses')}>
+                      {content.hero?.secondaryCtaText || 'Explore Courses'} <FaArrowRight />
                     </button>
                     <button className="m-btn secondary" onClick={openTelegram}>
-                      <FaTelegram /> {content.communityLabel || 'The 5% Club'}
+                      <FaTelegram /> {content.hero?.communityCtaText || content.communityLabel || 'The 5% Club'}
                     </button>
                   </div>
                 </div>
 
                 <div className="m-hero-image">
                   <img
-                    src={founder}
-                    alt="Mubarak Ahmad, Founder & Academic Director"
+                    src={content.hero?.image || founder}
+                    alt={content.about?.founderName ? `${content.about.founderName}, ${content.about.founderRole}` : 'Mubarak Ahmad, Founder & Academic Director'}
                     fetchPriority="high"
                     width="960"
                     height="1440"
                   />
                   <div className="m-mentor-label">
-                    <strong>Mubarak Ahmad</strong>
-                    <span>Founder & Academic Director</span>
+                    <strong>{content.about?.founderName || 'Mubarak Ahmad'}</strong>
+                    <span>{content.about?.founderRole || 'Founder & Academic Director'}</span>
                   </div>
                 </div>
               </section>
 
               {/* Highlight strip */}
               <div className="m-highlight-banner">
-                <strong>BUILD YOUR EDGE — LEARN · APPLY · EVOLVE</strong>
+                <strong>{content.hero?.badgeText ? `BUILD YOUR EDGE — ${content.hero.badgeText}` : 'BUILD YOUR EDGE — LEARN · APPLY · EVOLVE'}</strong>
               </div>
 
               {/* Learn the language of market */}
@@ -1013,11 +1032,11 @@ export default function MubsaExperience() {
               <section className="m-community">
                 <FaTelegram />
                 <div>
-                  <h2>WE GROW TOGETHER.</h2>
-                  <p>Be part of our growing community. Join our public Telegram channel to stay connected.</p>
+                  <h2>{content.community?.title || 'WE GROW TOGETHER.'}</h2>
+                  <p>{content.community?.text || 'Be part of our growing community. Join our public Telegram channel to stay connected.'}</p>
                 </div>
-                <button className="m-btn" onClick={openTelegram}>
-                  Join our 5% CLUB <FaArrowRight />
+                <button className="m-btn" onClick={() => content.community?.buttonUrl ? window.open(content.community.buttonUrl, '_blank', 'noopener,noreferrer') : openTelegram()}>
+                  {content.community?.buttonLabel || 'Join our 5% CLUB'} <FaArrowRight />
                 </button>
               </section>
 
@@ -1034,21 +1053,29 @@ export default function MubsaExperience() {
             <div className="m-page">
               <section className="m-section m-team">
                 <div className="m-team-image">
-                  <img src={portrait} alt="Mubarak Ahmad" width="912" height="1136" loading="lazy" />
+                  <img src={content.about?.founderImage || portrait} alt={content.about?.founderName || 'Mubarak Ahmad'} width="912" height="1136" loading="lazy" />
                 </div>
                 <div>
-                  <h2>Mubarak Ahmad.</h2>
-                  <p className="m-gold">Founder & Academic Director</p>
-                  <p>
-                    Mubsa Fin Institute provides market education from the foundations to advanced analysis. Founder and Academic Director Mubarak Ahmad is a share-market educator based in Dubai. His mission is to help at least one million middle-class people move forward through proper trading and investment education.
-                  </p>
-                  <p>
-                    His market journey includes five years of learning, four years of trading experience, and two years of teaching experience. He has completed basic, intermediate, and advanced training in Dubai through programmes carrying KHDA certification, and has attended more than 100 webinars and courses across the UAE, India, Malaysia, the United States, and the United Kingdom.
-                  </p>
-                  <p>
-                    His teaching approach puts preparation, a focused market window, patience, selective entries, and planned exits ahead of watching the market all day. The aim is to make market learning more structured for working professionals and full-time traders. Trading remains risky; no method can guarantee income or results.
-                  </p>
-                  <blockquote>“The greatest investment begins with investing in knowledge.”</blockquote>
+                  <h2>{content.about?.founderName || 'Mubarak Ahmad'}.</h2>
+                  <p className="m-gold">{content.about?.founderRole || 'Founder & Academic Director'}</p>
+                  <div style={{ whiteSpace: 'pre-line', display: 'grid', gap: '16px' }}>
+                    {content.about?.founderBio ? (
+                      content.about.founderBio.split('\n\n').map((para, i) => <p key={i}>{para}</p>)
+                    ) : (
+                      <>
+                        <p>
+                          Mubsa Fin Institute provides market education from the foundations to advanced analysis. Founder and Academic Director Mubarak Ahmad is a share-market educator based in Dubai. His mission is to help at least one million middle-class people move forward through proper trading and investment education.
+                        </p>
+                        <p>
+                          His market journey includes five years of learning, four years of trading experience, and two years of teaching experience. He has completed basic, intermediate, and advanced training in Dubai through programmes carrying KHDA certification, and has attended more than 100 webinars and courses across the UAE, India, Malaysia, the United States, and the United Kingdom.
+                        </p>
+                        <p>
+                          His teaching approach puts preparation, a focused market window, patience, selective entries, and planned exits ahead of watching the market all day. The aim is to make market learning more structured for working professionals and full-time traders. Trading remains risky; no method can guarantee income or results.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  <blockquote>{content.about?.founderQuote || '“The greatest investment begins with investing in knowledge.”'}</blockquote>
                   <button className="m-btn secondary" onClick={() => go('/founder')}>
                     EXPLORE THE STORY <FaArrowRight />
                   </button>
@@ -1064,16 +1091,16 @@ export default function MubsaExperience() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px', marginTop: '36px' }}>
                   <div className="m-card">
                     <p className="m-kicker">PURPOSE</p>
-                    <h3>OUR VISION</h3>
+                    <h3>{content.about?.visionTitle || 'OUR VISION'}</h3>
                     <p style={{ marginTop: '16px', lineHeight: '1.8' }}>
-                      To shape a generation of knowledgeable and disciplined traders and investors who understand market behaviour, think independently, identify opportunities through informed analysis, and approach financial markets with confidence and responsibility.
+                      {content.about?.visionText || 'To shape a generation of knowledgeable and disciplined traders and investors who understand market behaviour, think independently, identify opportunities through informed analysis, and approach financial markets with confidence and responsibility.'}
                     </p>
                   </div>
                   <div className="m-card">
                     <p className="m-kicker">COMMITMENT</p>
-                    <h3>OUR MISSION</h3>
+                    <h3>{content.about?.missionTitle || 'OUR MISSION'}</h3>
                     <p style={{ marginTop: '16px', lineHeight: '1.8' }}>
-                      To empower at least one million middle-class individuals through accessible and quality trading and investment education, equipping them with the knowledge and skills to navigate financial markets responsibly.
+                      {content.about?.missionText || 'To empower at least one million middle-class individuals through accessible and quality trading and investment education, equipping them with the knowledge and skills to navigate financial markets responsibly.'}
                     </p>
                   </div>
                 </div>
@@ -1086,36 +1113,52 @@ export default function MubsaExperience() {
             <div className="m-page">
               <section className="m-section m-team">
                 <div className="m-team-image">
-                  <img src={portrait} alt="Mubarak Ahmad" width="912" height="1136" loading="lazy" />
+                  <img src={content.about?.founderImage || portrait} alt={content.about?.founderName || 'Mubarak Ahmad'} width="912" height="1136" loading="lazy" />
                 </div>
                 <div>
-                  <p className="m-kicker">FOUNDER & ACADEMIC DIRECTOR</p>
-                  <h2>Mubarak Ahmad.</h2>
-                  <p className="m-gold">Founder & Academic Director</p>
-                  <p>
-                    Mubsa Fin Institute provides market education from the foundations to advanced analysis. Founder and Academic Director Mubarak Ahmad is a share-market educator based in Dubai. His mission is to help at least one million middle-class people move forward through proper trading and investment education.
-                  </p>
-                  <p>
-                    His market journey includes five years of learning, four years of trading experience, and two years of teaching experience. He has completed basic, intermediate, and advanced training in Dubai through programmes carrying KHDA certification, and has attended more than 100 webinars and courses across the UAE, India, Malaysia, the United States, and the United Kingdom.
-                  </p>
-                  <p>
-                    His teaching approach puts preparation, a focused market window, patience, selective entries, and planned exits ahead of watching the market all day. The aim is to make market learning more structured for working professionals and full-time traders. Trading remains risky; no method can guarantee income or results.
-                  </p>
-                  <blockquote>“The greatest investment begins with investing in knowledge.”</blockquote>
+                  <p className="m-kicker">{content.about?.founderRole?.toUpperCase() || 'FOUNDER & ACADEMIC DIRECTOR'}</p>
+                  <h2>{content.about?.founderName || 'Mubarak Ahmad'}.</h2>
+                  <p className="m-gold">{content.about?.founderRole || 'Founder & Academic Director'}</p>
+                  <div style={{ whiteSpace: 'pre-line', display: 'grid', gap: '16px' }}>
+                    {content.about?.founderBio ? (
+                      content.about.founderBio.split('\n\n').map((para, i) => <p key={i}>{para}</p>)
+                    ) : (
+                      <>
+                        <p>
+                          Mubsa Fin Institute provides market education from the foundations to advanced analysis. Founder and Academic Director Mubarak Ahmad is a share-market educator based in Dubai. His mission is to help at least one million middle-class people move forward through proper trading and investment education.
+                        </p>
+                        <p>
+                          His market journey includes five years of learning, four years of trading experience, and two years of teaching experience. He has completed basic, intermediate, and advanced training in Dubai through programmes carrying KHDA certification, and has attended more than 100 webinars and courses across the UAE, India, Malaysia, the United States, and the United Kingdom.
+                        </p>
+                        <p>
+                          His teaching approach puts preparation, a focused market window, patience, selective entries, and planned exits ahead of watching the market all day. The aim is to make market learning more structured for working professionals and full-time traders. Trading remains risky; no method can guarantee income or results.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  <blockquote>{content.about?.founderQuote || '“The greatest investment begins with investing in knowledge.”'}</blockquote>
                 </div>
               </section>
 
               {/* Security Systems Experience */}
               <section className="m-section m-tone">
                 <div style={{ maxWidth: '860px' }}>
-                  <p className="m-kicker">SECURITY SYSTEMS EXPERIENCE</p>
-                  <h2>Engineering expertise, kept in its own lane.</h2>
-                  <p style={{ fontSize: '15px', lineHeight: '1.8', marginTop: '20px' }}>
-                    Alongside his market education work, Mubarak Ahmad is a senior security systems engineer with more than 12 years of experience in the UAE and India. At Hikvision MEA, he supports technical delivery and training across the UAE and Oman, with a focus on AI-enabled security, CCTV, and ELV systems.
-                  </p>
-                  <p style={{ fontSize: '15px', lineHeight: '1.8' }}>
-                    His engineering work includes system planning, configuration, implementation support, troubleshooting, and user training. His profile records more than 150 product and user training sessions and a technical-support community of more than 600 MEA engineers that has resolved over 4,000 cases.
-                  </p>
+                  <p className="m-kicker">PROFESSIONAL EXPERIENCE</p>
+                  <h2>{content.about?.engineeringStoryTitle || 'Engineering expertise, kept in its own lane.'}</h2>
+                  <div style={{ whiteSpace: 'pre-line', display: 'grid', gap: '16px', marginTop: '20px', fontSize: '15px', lineHeight: '1.8' }}>
+                    {content.about?.engineeringStoryText ? (
+                      content.about.engineeringStoryText.split('\n\n').map((para, i) => <p key={i}>{para}</p>)
+                    ) : (
+                      <>
+                        <p>
+                          Alongside his market education work, Mubarak Ahmad is a senior security systems engineer with more than 12 years of experience in the UAE and India. At Hikvision MEA, he supports technical delivery and training across the UAE and Oman, with a focus on AI-enabled security, CCTV, and ELV systems.
+                        </p>
+                        <p>
+                          His engineering work includes system planning, configuration, implementation support, troubleshooting, and user training. His profile records more than 150 product and user training sessions and a technical-support community of more than 600 MEA engineers that has resolved over 4,000 cases.
+                        </p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </section>
 
@@ -1126,26 +1169,17 @@ export default function MubsaExperience() {
                   <h2>EXPERIENCE BUILT THROUGH LEARNING, PRACTICE & EDUCATION</h2>
                 </div>
                 <div className="m-stats-grid">
-                  <div className="m-stat-card">
-                    <strong>5+</strong>
-                    <span>Years of Market Education</span>
-                  </div>
-                  <div className="m-stat-card">
-                    <strong>4+</strong>
-                    <span>Years of Active Market Experience</span>
-                  </div>
-                  <div className="m-stat-card">
-                    <strong>2+</strong>
-                    <span>Years of Trading Education</span>
-                  </div>
-                  <div className="m-stat-card">
-                    <strong>100+</strong>
-                    <span>Learning Sessions & Industry Webinars</span>
-                  </div>
-                  <div className="m-stat-card">
-                    <strong>100%</strong>
-                    <span>Rule-Based Trading Framework</span>
-                  </div>
+                  {(content.stats && content.stats.length ? content.stats : [
+                    { number: '5+', label: 'Years of Market Education' },
+                    { number: '4+', label: 'Years of Active Market Experience' },
+                    { number: '2+', label: 'Years of Trading Education' },
+                    { number: '100+', label: 'Learning Sessions & Industry Webinars' }
+                  ]).map((item, index) => (
+                    <div className="m-stat-card" key={index}>
+                      <strong>{item.number}</strong>
+                      <span>{item.label}</span>
+                    </div>
+                  ))}
                 </div>
               </section>
             </div>
@@ -1302,17 +1336,17 @@ export default function MubsaExperience() {
               }}
             >
               <img
-                src="/mubsa-logo.jpg"
-                alt="Mubsa Fin Institute° — We Grow Together"
+                src={content.brand?.logo || "/mubsa-logo.jpg"}
+                alt={`${content.brand?.name || 'Mubsa Fin Institute°'} — ${content.brand?.tagline || 'We Grow Together'}`}
                 className="m-brand-img"
               />
               <div className="m-brand-title">
-                <strong>Mubsa Fin Institute°</strong>
-                <small>We Grow Together</small>
+                <strong>{content.brand?.name || 'Mubsa Fin Institute°'}</strong>
+                <small>{content.brand?.tagline || 'We Grow Together'}</small>
               </div>
             </a>
             <p>
-              Build your market understanding through a structured, time-conscious approach. Mubsa Fin Institute helps learners study markets, charts, and risk with purpose.
+              {content.footer?.description || 'Build your market understanding through a structured, time-conscious approach. Mubsa Fin Institute helps learners study markets, charts, and risk with purpose.'}
             </p>
             <p>{content.contact?.website || 'mubsafin.com'} · {content.contact.location}</p>
             <p>
@@ -1355,7 +1389,7 @@ export default function MubsaExperience() {
           </div>
 
           <div className="m-footer-bottom">
-            © {copyrightYear} Mubsa Fin Institute. Trading and investing involve risk, including possible loss of capital. Course content is educational and does not guarantee profits or replace financial advice based on individual circumstances.
+            © {copyrightYear} {content.footer?.copyright || 'Mubsa Fin Institute. All rights reserved.'} · {content.footer?.disclaimer || 'Trading and investing involve risk, including possible loss of capital. Course content is educational and does not guarantee profits or replace financial advice based on individual circumstances.'}
           </div>
         </footer>
 
@@ -1371,10 +1405,10 @@ export default function MubsaExperience() {
             {['welcome', 'webinar'].includes(modal.type) && (
               <div className="m-webinar-welcome">
                 <div className="m-webinar-mentor">
-                  <img src={founder} alt="Mubarak Ahmad, Founder & Academic Director" />
+                  <img src={content.about?.founderMentorImage || founder} alt={content.about?.founderName ? `${content.about.founderName}, ${content.about.founderRole}` : "Mubarak Ahmad, Founder & Academic Director"} />
                   <div className="m-mentor-label">
-                    <strong>Mubarak Ahmad</strong>
-                    <span>Founder & Academic Director</span>
+                    <strong>{content.about?.founderName || 'Mubarak Ahmad'}</strong>
+                    <span>{content.about?.founderRole || 'Founder & Academic Director'}</span>
                   </div>
                 </div>
                 <div>
